@@ -253,7 +253,11 @@ function buildINV(parsed){
     if(!cod)return;
 
     var mat = String(getCol(r,h,['Texto breve de material','Texto breve','Material'],2)||'').trim();
-    var kg  = pn(getCol(r,h,['Libre utilización','Libre utilizacion','Libre Util'],6)||'0');
+    /* Libre utilización está FIJO en Columna G (índice 6) del CSV */
+    var kgRaw = (r._r && r._r[6] !== undefined && r._r[6] !== '')
+                ? r._r[6]
+                : getCol(r,h,['Libre utilización','Libre utilizacion','LIBRE UTIL','LIBRE'],6);
+    var kg = pn(kgRaw || '0');
 
     if(!inv[cod])inv[cod]={kg:0,m:'',_mx:0};
     inv[cod].kg+=kg;   /* sumar TODAS las filas del mismo almacén */
