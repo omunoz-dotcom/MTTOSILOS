@@ -156,6 +156,19 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 </style>
+
+/* ── FILTRO DE FECHA ── */
+.date-bar{background:#fff;border-bottom:1px solid var(--border);padding:8px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.date-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text2);}
+.date-pills{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.dp{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.5px;padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.dp:hover{border-color:var(--navy);color:var(--navy);}
+.dp.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+.dp.today{border-color:var(--green);}
+.dp.today.active{background:var(--green);border-color:var(--green);}
+.date-info{margin-left:auto;font-size:11px;color:var(--text3);font-style:italic;}
+
+</style>
 </head>
 <body>
 
@@ -175,16 +188,15 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
         <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-      </svg>
-      Actualizar
+      </svg>Actualizar
     </button>
-    <button class="hbtn" onclick="openConfig()" title="Configurar URLs de Google Sheets">
+    <button class="hbtn" onclick="openConfig()" title="Configurar URLs">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-      </svg>
-      Config
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>Config
     </button>
-    <div class="spill" onclick="refreshNow()" title="Haz clic para actualizar">
+    <div class="spill" onclick="refreshNow()">
       <div class="sdot" id="sdot"></div>
       <span class="stxt" id="stxt">Conectando...</span>
     </div>
@@ -192,23 +204,30 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
   </div>
 </header>
 
+<!-- ── BANNER INFO ── -->
 <div class="file-banner" id="fileBanner" style="display:none">
   <span class="file-banner-icon">📡</span>
   <span>Fuente: <strong>Google Sheets · en vivo</strong></span>
-  <span>·</span>
-  <span id="fileRows">—</span> registros de inventario
-  <span>·</span>
-  <span id="fileStructures">—</span> estructuras
+  <span>·</span><span id="fileRows">—</span> registros
+  <span>·</span><span id="fileStructures">—</span> estructuras
   <span class="file-date" id="fileDate"></span>
 </div>
 
+<!-- ── FILTRO DE FECHA ── -->
+<div class="date-bar" id="dateBar" style="display:none">
+  <span class="date-label">📅 Fecha inventario:</span>
+  <div class="date-pills" id="datePills"></div>
+  <span class="date-info" id="dateInfo"></span>
+</div>
+
+<!-- ── REFRESH BAR ── -->
 <div class="refresh-bar" id="refreshBar" style="display:none">
-  <span>⟳ Próxima actualización en</span><span class="rc" id="cntDown">5:00</span>
-  <span style="margin-left:auto;font-size:10px;opacity:.7">Auto-refresh cada 5 minutos · Haz clic en "Actualizar" para forzar</span>
+  <span>⟳ Próxima actualización en</span>
+  <span class="rc" id="cntDown">5:00</span>
+  <span style="margin-left:auto;font-size:10px;opacity:.7">Auto-refresh cada 5 min</span>
 </div>
 
 <div class="kpi-bar" id="kbar" style="display:none"></div>
-
 <nav class="tabs-nav" id="tnav" style="display:none"></nav>
 
 <main id="main">
@@ -219,46 +238,51 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
   </div>
 </main>
 
+<!-- ── CONFIG MODAL ── -->
 <div class="modal-overlay" id="cfgOverlay">
   <div class="modal">
     <div class="modal-title">⚙️ Configurar Google Sheets</div>
-    <div class="modal-sub">Ingresa las URLs CSV de tus hojas publicadas. Los datos se cargarán directamente desde Google Sheets cada 5 minutos.</div>
-
+    <div class="modal-sub">Ingresa las URLs CSV publicadas. Los datos se actualizan automáticamente cada 5 minutos.</div>
     <div class="cfg-section">
-      <label class="cfg-label">📦 URL CSV — Hoja de Inventario (BD-MB52-SILOS)</label>
-      <div class="cfg-desc">Asegúrate de que la columna E sea "Almacén"</div>
-      <input class="cfg-input" id="urlInv" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?gid=XXXXXX&single=true&output=csv">
+      <label class="cfg-label">📦 URL Inventario (BD-MB52-SILOS)</label>
+      <div class="cfg-desc">Col A = Fecha · Col E = Almacén · Libre utilización = stock en KG</div>
+      <input class="cfg-input" id="urlInv" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?gid=XXXXX&single=true&output=csv">
+      <div class="cfg-hint">
+        <strong>Columnas esperadas:</strong> <code>Col A</code> = Fecha · <code>Col E</code> = Almacén (código) · <code>Texto breve de material</code> · <code>Libre utilización</code> (KG)
+      </div>
     </div>
-
     <div class="cfg-section">
-      <label class="cfg-label">🏗️ URL CSV — Hoja de Estructura (SILOS ESTRUCTURA)</label>
-      <div class="cfg-desc">Asegúrate de que la columna A sea "Almacén"</div>
-      <input class="cfg-input" id="urlEst" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?gid=XXXXXX&single=true&output=csv">
+      <label class="cfg-label">🏗️ URL Estructura (SILOS ESTRUCTURA)</label>
+      <div class="cfg-desc">Col A = Almacén · NOMBRE ALMACEN · CAP ALM TON · TIPO SILO · UBICACION</div>
+      <input class="cfg-input" id="urlEst" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?gid=XXXXX&single=true&output=csv">
     </div>
-
     <div class="modal-actions">
       <button class="btn-cancel" id="cfgCancelBtn" onclick="closeConfig()">Cancelar</button>
-      <button class="btn-save" onclick="saveConfig()">💾 Guardar y Cargar Datos</button>
+      <button class="btn-save" onclick="saveConfig()">💾 Guardar y Cargar</button>
     </div>
   </div>
 </div>
 
 <script>
 /* ═══════════════════════════════════════════════
-   CONFIGURACIÓN POR DEFECTO
+   CONFIGURACIÓN
 ═══════════════════════════════════════════════ */
 var DEFAULT_CONFIG = {
   urlInv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCU-_7OuwK0xSG_eMJ5QMAI6-FI5O59a33ZP2sDtRPwVZxvJwcXIv_ymBh7-JFhZTPX-bSKngVC2b0/pub?gid=657619863&single=true&output=csv',
   urlEst: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCU-_7OuwK0xSG_eMJ5QMAI6-FI5O59a33ZP2sDtRPwVZxvJwcXIv_ymBh7-JFhZTPX-bSKngVC2b0/pub?gid=208840855&single=true&output=csv'
 };
-
-var REFRESH_MS = 5 * 60 * 1000; // 5 minutos
+var REFRESH_MS = 5 * 60 * 1000;
 
 /* ═══════════════════════════════════════════════
    ESTADO GLOBAL
 ═══════════════════════════════════════════════ */
 var GS = {}, INV = {}, EST = [], TAB = 0;
 var refreshTimer = null, countdownTimer = null, nextRefresh = null;
+
+// ALL_DATES: todas las fechas del inventario ordenadas desc
+// ALL_INV:  inventario completo agrupado por fecha -> cod -> {kg, m}
+var ALL_DATES = [], ALL_INV = {}, SELECTED_DATE = null;
+
 var SC = {
   '1' : {i:'▲', l:'LLENANDO', c:'#167848', cl:'fill'},
   '0' : {i:'➖', l:'ESTABLE',  c:'#2a6888', cl:'stable'},
@@ -266,20 +290,16 @@ var SC = {
 };
 
 /* ═══════════════════════════════════════════════
-   LOCAL STORAGE CONFIG
+   LOCAL STORAGE
 ═══════════════════════════════════════════════ */
 function loadConfig() {
   try {
-    var saved = localStorage.getItem('silos_config_v6');
-    if (saved) {
-      var p = JSON.parse(saved);
-      if (p.urlInv) DEFAULT_CONFIG.urlInv = p.urlInv;
-      if (p.urlEst) DEFAULT_CONFIG.urlEst = p.urlEst;
-    }
+    var s = localStorage.getItem('silos_cfg_v7');
+    if (s) { var p = JSON.parse(s); if(p.urlInv) DEFAULT_CONFIG.urlInv=p.urlInv; if(p.urlEst) DEFAULT_CONFIG.urlEst=p.urlEst; }
   } catch(e) {}
 }
 function saveConfigToStorage() {
-  try { localStorage.setItem('silos_config_v6', JSON.stringify(DEFAULT_CONFIG)); } catch(e) {}
+  try { localStorage.setItem('silos_cfg_v7', JSON.stringify(DEFAULT_CONFIG)); } catch(e) {}
 }
 
 /* ═══════════════════════════════════════════════
@@ -288,222 +308,307 @@ function saveConfigToStorage() {
 function openConfig() {
   document.getElementById('urlInv').value = DEFAULT_CONFIG.urlInv || '';
   document.getElementById('urlEst').value = DEFAULT_CONFIG.urlEst || '';
-  document.getElementById('cfgCancelBtn').style.display = (EST.length > 0) ? '' : 'none';
+  document.getElementById('cfgCancelBtn').style.display = EST.length > 0 ? '' : 'none';
   document.getElementById('cfgOverlay').classList.add('show');
 }
-function closeConfig() {
-  document.getElementById('cfgOverlay').classList.remove('show');
-}
+function closeConfig() { document.getElementById('cfgOverlay').classList.remove('show'); }
 function saveConfig() {
   var inv = document.getElementById('urlInv').value.trim();
   var est = document.getElementById('urlEst').value.trim();
-  if (!inv || !est) {
-    alert('Por favor ingresa las dos URLs para continuar.');
-    return;
-  }
-  DEFAULT_CONFIG.urlInv = inv;
-  DEFAULT_CONFIG.urlEst = est;
-  saveConfigToStorage();
-  closeConfig();
-  loadData();
+  if (!inv || !est) { alert('Ingresa las dos URLs.'); return; }
+  DEFAULT_CONFIG.urlInv = inv; DEFAULT_CONFIG.urlEst = est;
+  saveConfigToStorage(); closeConfig(); loadData();
 }
 document.getElementById('cfgOverlay').addEventListener('click', function(e) {
   if (e.target === this && EST.length > 0) closeConfig();
 });
 
 /* ═══════════════════════════════════════════════
-   CSV PARSER 
+   CSV PARSER (maneja comillas dobles)
 ═══════════════════════════════════════════════ */
 function parseCSV(text) {
   var lines = [], inQ = false, field = '', row = [];
   for (var i = 0; i < text.length; i++) {
     var c = text[i];
-    if (c === '"') {
-      if (inQ && text[i+1] === '"') { field += '"'; i++; }
-      else inQ = !inQ;
-    } else if (c === ',' && !inQ) {
+    if (c === '"') { if (inQ && text[i+1]==='"') { field+='"'; i++; } else inQ=!inQ; }
+    else if (c === ',' && !inQ) { row.push(field.trim()); field = ''; }
+    else if ((c === '\n' || c === '\r') && !inQ) {
+      if (c==='\r' && text[i+1]==='\n') i++;
       row.push(field.trim()); field = '';
-    } else if ((c === '\n' || c === '\r') && !inQ) {
-      if (c === '\r' && text[i+1] === '\n') i++;
-      row.push(field.trim()); field = '';
-      if (row.some(function(f){return f!=='';})) lines.push(row);
+      if (row.some(function(f){return f!=='';} )) lines.push(row);
       row = [];
     } else { field += c; }
   }
-  if (field !== '' || row.length) { row.push(field.trim()); if (row.some(function(f){return f!=='';})) lines.push(row); }
-  if (!lines.length) return [];
-  // Forzamos los encabezados a mayúsculas para evitar errores de tipeo en el excel
-  var headers = lines[0].map(function(h) { return h.trim().toUpperCase(); });
-  return lines.slice(1).map(function(r) {
-    var obj = {};
-    headers.forEach(function(h, i) { obj[h] = r[i] !== undefined ? r[i] : ''; });
-    return obj;
-  });
+  if (field !== '' || row.length) { row.push(field.trim()); if(row.some(function(f){return f!=='';})) lines.push(row); }
+  if (!lines.length) return { headers:[], rows:[] };
+  var headers = lines[0].map(function(h){ return h.trim().toUpperCase(); });
+  return { headers: headers, rows: lines.slice(1) };
 }
 
 /* ═══════════════════════════════════════════════
-   UTILS Y CORRELACIÓN DE DATOS ESTRICTA
+   UTILS
 ═══════════════════════════════════════════════ */
-
-// Esta función lee el código del Almacén, le quita los espacios y le borra
-// los ceros a la izquierda. Así garantiza que "0012" sea idéntico a "12".
-function parseCod(c) {
-  if (!c) return '';
-  return String(c).trim().replace(/^0+/, ''); 
-}
-
+function parseCod(c) { return c ? String(c).trim().replace(/^0+/,'') : ''; }
 function pn(s) {
   if (typeof s === 'number') return s;
-  s = String(s || '').trim().replace(/\s/g,'');
-  if (!s || s === '-') return 0;
-  if (s.indexOf(',') > -1 && s.indexOf('.') > -1)
-    s = s.lastIndexOf(',') > s.lastIndexOf('.') ? s.replace(/\./g,'').replace(',','.') : s.replace(/,/g,'');
-  else if (s.indexOf(',') > -1) s = s.replace(',','.');
+  s = String(s||'').trim().replace(/\s/g,'');
+  if (!s || s==='-') return 0;
+  if (s.indexOf(',')>-1 && s.indexOf('.')>-1)
+    s = s.lastIndexOf(',')>s.lastIndexOf('.') ? s.replace(/\./g,'').replace(',','.') : s.replace(/,/g,'');
+  else if (s.indexOf(',')>-1) s = s.replace(',','.');
   return parseFloat(s) || 0;
 }
-function ft(kg) { var t=kg/1000; if(t>=1000) return (t/1000).toFixed(1)+'k TON'; if(t>=100) return Math.round(t)+' TON'; return t.toFixed(2)+' TON'; }
-function fn(n) { return n.toLocaleString('es-EC', {maximumFractionDigits:0}); }
-function pc(p) { return p>=85?'#982828':p>=50?'#b06010':'#167848'; }
-function pb(p) { return p>=85?'rgba(152,40,40,.1)':p>=50?'rgba(176,96,16,.1)':'rgba(22,120,72,.1)'; }
-function pt(p) { return p>=85?'#c03030':p>=50?'#c87018':'#189858'; }
+function ft(kg){ var t=kg/1000; if(t>=1000)return(t/1000).toFixed(1)+'k TON'; if(t>=100)return Math.round(t)+' TON'; return t.toFixed(2)+' TON'; }
+function fn(n){ return n.toLocaleString('es-EC',{maximumFractionDigits:0}); }
+function pc(p){ return p>=85?'#982828':p>=50?'#b06010':'#167848'; }
+function pb(p){ return p>=85?'rgba(152,40,40,.1)':p>=50?'rgba(176,96,16,.1)':'rgba(22,120,72,.1)'; }
+function pt(p){ return p>=85?'#c03030':p>=50?'#c87018':'#189858'; }
+function setSyncState(s,t){ var d=document.getElementById('sdot'); d.className='sdot '+(s==='ok'?'ok':s==='loading'?'loading':'err'); document.getElementById('stxt').textContent=t; }
+function mapTipo(r){ r=r.toUpperCase(); if(r.indexOf('CONICO')>-1||r.indexOf('PULMON')>-1||r.indexOf('PULMÓN')>-1)return 'PULMON'; if(r.indexOf('BODEGA')>-1)return 'BODEGA'; if(r.indexOf('TOLVA')>-1)return 'TOLVA'; return 'SILO'; }
 
-function setSyncState(state, txt) {
-  var d = document.getElementById('sdot');
-  d.className = 'sdot ' + (state === 'ok' ? 'ok' : state === 'loading' ? 'loading' : 'err');
-  document.getElementById('stxt').textContent = txt;
+/* ═══════════════════════════════════════════════
+   NORMALIZAR FECHA
+═══════════════════════════════════════════════ */
+function normDate(raw) {
+  if (!raw) return null;
+  var s = String(raw).trim();
+  // Intentar parsear varios formatos: DD/MM/YYYY, YYYY-MM-DD, MM/DD/YYYY, etc.
+  var d = null;
+  // Formato ISO: 2025-05-25 o 25/05/2025 o 25-05-2025
+  var m;
+  if ((m = s.match(/^(\d{4})[-/](\d{2})[-/](\d{2})/))) {
+    d = new Date(+m[1], +m[2]-1, +m[3]);
+  } else if ((m = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/))) {
+    // DD/MM/YYYY — asumimos día/mes si DD<=31 y MM<=12
+    d = new Date(+m[3], +m[2]-1, +m[1]);
+  } else {
+    // Intentar parseo nativo
+    var attempt = new Date(s);
+    if (!isNaN(attempt.getTime())) d = attempt;
+  }
+  if (!d || isNaN(d.getTime())) return null;
+  // Normalizar a string YYYY-MM-DD
+  var yy = d.getFullYear();
+  var mm = String(d.getMonth()+1).padStart(2,'0');
+  var dd = String(d.getDate()).padStart(2,'0');
+  return yy+'-'+mm+'-'+dd;
 }
 
-function mapTipo(raw) {
-  var r = raw.toUpperCase();
-  if (r.indexOf('CONICO') > -1 || r.indexOf('PULMON') > -1 || r.indexOf('PULMÓN') > -1) return 'PULMON';
-  if (r.indexOf('BODEGA') > -1) return 'BODEGA';
-  if (r.indexOf('TOLVA')  > -1) return 'TOLVA';
-  return 'SILO';
+function fmtDateDisplay(iso) {
+  if (!iso) return '—';
+  var p = iso.split('-');
+  return p[2]+'/'+p[1]+'/'+p[0];
 }
 
 /* ═══════════════════════════════════════════════
-   DATA LOADING (JOIN TIPO BASE DE DATOS)
+   CARGA DE DATOS — JOIN POR CÓDIGO ALMACÉN
+   Col A (idx 0) = FECHA
+   Col E (idx 4) = ALMACÉN (código mandante)
 ═══════════════════════════════════════════════ */
 function loadData() {
   if (!DEFAULT_CONFIG.urlInv || !DEFAULT_CONFIG.urlEst) {
-    document.getElementById('loadMsg').textContent = 'Configura las URLs de Google Sheets para comenzar';
-    setSyncState('err', 'Sin configurar');
-    openConfig();
-    return;
+    setSyncState('err','Sin configurar'); openConfig(); return;
   }
-
-  setSyncState('loading', 'Actualizando...');
+  setSyncState('loading','Actualizando...');
   document.getElementById('refreshBtn').classList.add('spin');
 
   var ts = '&_t=' + Date.now();
-  var urlInv = DEFAULT_CONFIG.urlInv + ts;
-  var urlEst = DEFAULT_CONFIG.urlEst + ts;
-
   Promise.all([
-    fetch(urlInv).then(function(r) {
-      if (!r.ok) throw new Error('Error HTTP ' + r.status + ' en inventario');
-      return r.text();
-    }),
-    fetch(urlEst).then(function(r) {
-      if (!r.ok) throw new Error('Error HTTP ' + r.status + ' en estructura');
-      return r.text();
-    })
+    fetch(DEFAULT_CONFIG.urlInv + ts).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status+' inventario'); return r.text(); }),
+    fetch(DEFAULT_CONFIG.urlEst + ts).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status+' estructura'); return r.text(); })
   ]).then(function(results) {
-    var invRows = parseCSV(results[0]);
-    var estRows = parseCSV(results[1]);
 
-    // 1. DICCIONARIO DE INVENTARIO (La llave es el Código de Almacén)
-    var invByCod = {};
-    
-    invRows.forEach(function(r) {
-      // Extrae la columna E del Inventario (Almacén)
-      var cod = parseCod(r['ALMACÉN'] || r['ALMACEN']);
-      var mat = String(r['TEXTO BREVE DE MATERIAL'] || r['MATERIAL'] || '').trim();
-      var kg  = pn(r['LIBRE UTILIZACIÓN'] || r['LIBRE UTILIZACION'] || 0);
-      
-      if (!cod || kg <= 0) return;
+    /* ─── 1. PARSEAR INVENTARIO ─── */
+    var invParsed = parseCSV(results[0]);
+    var hdr = invParsed.headers;
 
-      if (!invByCod[cod]) invByCod[cod] = {kg: 0, m: '', _mx: 0};
-      
-      invByCod[cod].kg += kg;
-      // Guardar el material con mayor cantidad en ese almacén
-      if (mat && kg > invByCod[cod]._mx) { 
-        invByCod[cod].m = mat; 
-        invByCod[cod]._mx = kg; 
+    // Detectar columnas clave
+    // Col A (0) = Fecha, Col E (4) = Almacén
+    // También buscamos por nombre de columna como fallback
+    function colIdx(names, fallbackIdx) {
+      for (var ni=0; ni<names.length; ni++) {
+        for (var hi=0; hi<hdr.length; hi++) {
+          if (hdr[hi].toUpperCase().indexOf(names[ni].toUpperCase()) > -1) return hi;
+        }
       }
+      return fallbackIdx;
+    }
+
+    var iDate = colIdx(['FECHA','DATE','DÍA','DIA'], 0);           // Col A
+    var iCod  = colIdx(['ALMACÉN','ALMACEN','ALM'], 4);             // Col E
+    var iMat  = colIdx(['TEXTO BREVE','MATERIAL','DESCRIPCION'], 2); // approx Col C
+    var iKg   = colIdx(['LIBRE UTILIZACIÓN','LIBRE UTILIZACION','LIBRE UTIL'], 6); // approx Col G
+
+    // DEBUG en consola
+    console.log('[Inventario] Columnas detectadas:',
+      'FECHA='+iDate+'('+hdr[iDate]+')',
+      'ALM='+iCod+'('+hdr[iCod]+')',
+      'MAT='+iMat+'('+hdr[iMat]+')',
+      'KG='+iKg+'('+hdr[iKg]+')');
+
+    // Agrupar: allInv[fechaISO][codAlm] = {kg, m, _mx}
+    var allInv = {};
+    var dateSet = {};
+
+    invParsed.rows.forEach(function(row) {
+      var fechaRaw = row[iDate] || '';
+      var codRaw   = row[iCod]  || '';
+      var matRaw   = row[iMat]  || '';
+      var kgRaw    = row[iKg]   || '0';
+
+      var fechaISO = normDate(fechaRaw);
+      var cod      = parseCod(codRaw);
+      var mat      = String(matRaw).trim();
+      var kg       = pn(kgRaw);
+
+      // Solo ignorar filas sin código válido o sin fecha válida
+      if (!cod || !fechaISO) return;
+
+      if (!allInv[fechaISO]) allInv[fechaISO] = {};
+      if (!allInv[fechaISO][cod]) allInv[fechaISO][cod] = { kg:0, m:'', _mx:0 };
+
+      // SUMAR KG (positivos y negativos, no filtrar por kg<=0)
+      allInv[fechaISO][cod].kg += kg;
+
+      // Guardar el material con mayor cantidad absoluta
+      if (mat && Math.abs(kg) > allInv[fechaISO][cod]._mx) {
+        allInv[fechaISO][cod].m  = mat;
+        allInv[fechaISO][cod]._mx = Math.abs(kg);
+      }
+      dateSet[fechaISO] = true;
     });
 
-    // 2. CONJUNTO DE DATOS FINAL (Combinando ambas tablas vía código)
+    // Ordenar fechas descendente (más reciente primero)
+    var sortedDates = Object.keys(dateSet).sort().reverse();
+
+    /* ─── 2. PARSEAR ESTRUCTURA ─── */
+    var estParsed = parseCSV(results[1]);
+    var ehdr = estParsed.headers;
+
+    function eColIdx(names, fb) {
+      for (var ni=0; ni<names.length; ni++)
+        for (var hi=0; hi<ehdr.length; hi++)
+          if (ehdr[hi].indexOf(names[ni])>-1) return hi;
+      return fb;
+    }
+    var eCod  = eColIdx(['ALMACÉN','ALMACEN'], 0);
+    var eUbi  = eColIdx(['UBICACIÓN','UBICACION'], 1);
+    var eNom  = eColIdx(['NOMBRE ALMACÉN','NOMBRE ALMACEN'], 2);
+    var eCap  = eColIdx(['CAP ALM TON','CAPACIDAD'], 3);
+    var eTipo = eColIdx(['TIPO SILO','TIPO'], 4);
+
+    console.log('[Estructura] Columnas:', 'COD='+eCod, 'UBI='+eUbi, 'NOM='+eNom, 'CAP='+eCap, 'TIPO='+eTipo);
+
     var est = [];
-    var invMatched = {};
-
-    estRows.forEach(function(r) {
-      // Extrae la columna A de la Estructura (Almacén)
-      var cod  = parseCod(r['ALMACÉN'] || r['ALMACEN']);
-      var ubi  = String(r['UBICACIÓN'] || r['UBICACION'] || '').trim().toUpperCase();
-      var nom  = String(r['NOMBRE ALMACÉN'] || r['NOMBRE ALMACEN'] || '').trim().toUpperCase();
-      var cap  = pn(r['CAP ALM TON'] || r['CAPACIDAD'] || 0);
-      var tipo = mapTipo(String(r['TIPO SILO'] || 'SILO').trim());
-      
-      if (!cod || !nom || nom === '-' || cap <= 0) return;
-
-      // Se guarda la estructura física
-      est.push({cod: cod, u: ubi, n: nom, c: cap, t: tipo});
-
-      // RELACIÓN EXACTA: Buscamos en el diccionario usando el código como llave.
-      // Si el almacén no existe en el inventario, se crea vacío (0 kg).
-      invMatched[nom] = invByCod[cod] || {kg: 0, m: ''}; 
+    estParsed.rows.forEach(function(row) {
+      var cod  = parseCod(row[eCod]);
+      var ubi  = String(row[eUbi]||'').trim().toUpperCase();
+      var nom  = String(row[eNom]||'').trim().toUpperCase();
+      var cap  = pn(row[eCap]);
+      var tipo = mapTipo(String(row[eTipo]||'SILO'));
+      if (!cod || !nom || nom==='-' || cap<=0) return;
+      est.push({ cod:cod, u:ubi, n:nom, c:cap, t:tipo });
     });
-    
-    // Ordenar estructuras
-    est.sort(function(a,b){ return a.u !== b.u ? a.u.localeCompare(b.u) : b.c - a.c; });
+    est.sort(function(a,b){ return a.u!==b.u ? a.u.localeCompare(b.u) : b.c-a.c; });
 
-    INV = invMatched;
-    EST = est;
+    /* ─── 3. GUARDAR ESTADO ─── */
+    ALL_INV    = allInv;
+    ALL_DATES  = sortedDates;
+    EST        = est;
 
-    // Actualizar UI
+    // Seleccionar la fecha más reciente por defecto
+    if (sortedDates.length > 0 && !SELECTED_DATE) {
+      SELECTED_DATE = sortedDates[0];
+    } else if (sortedDates.indexOf(SELECTED_DATE) === -1 && sortedDates.length > 0) {
+      SELECTED_DATE = sortedDates[0]; // resetear si la fecha guardada ya no existe
+    }
+
+    // Actualizar INV para la fecha seleccionada
+    applyDateFilter(SELECTED_DATE);
+
+    /* ─── 4. UI ─── */
     var now = new Date();
-    var timeStr = now.toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-    setSyncState('ok', 'Actualizado ' + timeStr);
-    document.getElementById('fileRows').textContent = Object.keys(invRows).length;
+    setSyncState('ok','Actualizado '+now.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}));
+    document.getElementById('fileRows').textContent = invParsed.rows.length;
     document.getElementById('fileStructures').textContent = est.length;
-    document.getElementById('fileDate').textContent = 'Última sincronización: ' + now.toLocaleString('es-EC');
-    document.getElementById('fileBanner').style.display = 'flex';
-    document.getElementById('kbar').style.display = 'flex';
-    document.getElementById('tnav').style.display = 'flex';
-    document.getElementById('refreshBar').style.display = 'flex';
+    document.getElementById('fileDate').textContent = 'Última sync: '+now.toLocaleString('es-EC');
+    document.getElementById('fileBanner').style.display  = 'flex';
+    document.getElementById('kbar').style.display        = 'flex';
+    document.getElementById('tnav').style.display        = 'flex';
+    document.getElementById('refreshBar').style.display  = 'flex';
     document.getElementById('refreshBtn').classList.remove('spin');
 
+    buildDatePills();
     startCountdown();
     render();
 
   }).catch(function(err) {
-    setSyncState('err', 'Error de conexión');
+    setSyncState('err','Error de conexión');
     document.getElementById('refreshBtn').classList.remove('spin');
-    document.getElementById('loadMsg').textContent = '⚠️ ' + err.message + '. Verifica que las hojas estén publicadas públicamente.';
-    console.error('Error cargando Google Sheets:', err);
+    document.getElementById('loadMsg').textContent = '⚠️ '+err.message;
+    console.error(err);
   });
 }
 
-function refreshNow() {
-  clearInterval(refreshTimer);
-  clearInterval(countdownTimer);
-  loadData();
-  refreshTimer = setInterval(loadData, REFRESH_MS);
+/* ═══════════════════════════════════════════════
+   FILTRO DE FECHA
+═══════════════════════════════════════════════ */
+function applyDateFilter(dateISO) {
+  SELECTED_DATE = dateISO;
+  var dayInv = ALL_INV[dateISO] || {};
+  // Construir INV (por nombre del silo) para la fecha seleccionada
+  var matched = {};
+  EST.forEach(function(d) {
+    var raw = dayInv[d.cod] || { kg:0, m:'' };
+    // kg puede ser negativo si hay ajustes — tomar valor absoluto para visualización
+    matched[d.n] = { kg: Math.max(0, raw.kg), m: raw.m };
+  });
+  INV = matched;
 }
 
-function startCountdown() {
-  clearInterval(countdownTimer);
-  nextRefresh = Date.now() + REFRESH_MS;
-  countdownTimer = setInterval(function() {
-    var rem = Math.max(0, nextRefresh - Date.now());
-    var m = Math.floor(rem / 60000), s = Math.floor((rem % 60000) / 1000);
-    document.getElementById('cntDown').textContent = m + ':' + (s < 10 ? '0' : '') + s;
-  }, 1000);
+function buildDatePills() {
+  document.getElementById('dateBar').style.display = 'flex';
+  var container = document.getElementById('datePills');
+  container.innerHTML = '';
+
+  var todayISO = normDate(new Date().toISOString().split('T')[0]);
+
+  ALL_DATES.forEach(function(iso) {
+    var pill = document.createElement('button');
+    pill.className = 'dp' + (iso === SELECTED_DATE ? ' active':'') + (iso === todayISO ? ' today':'');
+    pill.textContent = fmtDateDisplay(iso);
+    pill.dataset.date = iso;
+    pill.addEventListener('click', function() {
+      applyDateFilter(this.dataset.date);
+      buildDatePills(); // redibuja pills
+      render();
+    });
+    container.appendChild(pill);
+  });
+
+  var totalRec = Object.keys(ALL_INV[SELECTED_DATE]||{}).length;
+  document.getElementById('dateInfo').textContent =
+    'Mostrando '+ totalRec + ' almacenes con datos en '+fmtDateDisplay(SELECTED_DATE);
 }
 
 /* ═══════════════════════════════════════════════
-   SVG BUILDERS (Gráficos)
+   REFRESH
+═══════════════════════════════════════════════ */
+function refreshNow() {
+  clearInterval(refreshTimer); clearInterval(countdownTimer);
+  loadData();
+  refreshTimer = setInterval(loadData, REFRESH_MS);
+}
+function startCountdown() {
+  clearInterval(countdownTimer);
+  nextRefresh = Date.now() + REFRESH_MS;
+  countdownTimer = setInterval(function(){
+    var rem = Math.max(0, nextRefresh - Date.now());
+    var m = Math.floor(rem/60000), s = Math.floor((rem%60000)/1000);
+    document.getElementById('cntDown').textContent = m+':'+(s<10?'0':'')+s;
+  }, 1000);
+}
+
 ═══════════════════════════════════════════════ */
 function mkDefs(id) {
   return '<defs>'
@@ -782,6 +887,21 @@ setInterval(function() {
 /* ═══════════════════════════════════════════════
    INICIO
 ═══════════════════════════════════════════════ */
+loadConfig();
+loadData();
+refreshTimer = setInterval(loadData, REFRESH_MS);
+</script>
+</body>
+
+/* CLOCK */
+setInterval(function() {
+  var n = new Date();
+  document.getElementById('clk').innerHTML =
+    n.toLocaleDateString('es-EC',{weekday:'short',day:'2-digit',month:'short',year:'numeric'})+'<br>'+
+    n.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}, 1000);
+
+/* ── INICIO ── */
 loadConfig();
 loadData();
 refreshTimer = setInterval(loadData, REFRESH_MS);
