@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>ALMACENERA — Control de Silos</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<!-- Firebase SDK compat -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f2f5f8;--sf:#fff;--sf2:#edf1f5;
-  --bd:#d8e2ec;--bd2:#b8cad8;
+  --bg:#f2f5f8;--surface:#fff;--surface2:#edf1f5;
+  --border:#d8e2ec;--border2:#b8cad8;
   --navy:#0c2840;--navy2:#1a3f5c;
   --gold:#c07818;--gold2:#e09820;
   --steel:#2a6888;--green:#167848;--red:#982828;
@@ -21,7 +21,6 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;}
 
-/* HEADER */
 header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 14px rgba(0,0,0,.28);}
 .hbrand{display:flex;align-items:center;gap:11px;}
 .hicon{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:17px;}
@@ -32,74 +31,62 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
 .hkpi-v{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--gold2);line-height:1;}
 .hkpi-l{font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,.4);text-transform:uppercase;margin-top:2px;}
 .hright{display:flex;align-items:center;gap:10px;}
-
-/* SYNC PILL */
 .spill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:4px 11px;}
-.sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.sdot.csv{background:#2ecc71;box-shadow:0 0 6px #2ecc71;animation:blink 2s ease-in-out infinite;}
-.sdot.fb{background:#4a90e2;box-shadow:0 0 6px #4a90e2;animation:blink 1.5s ease-in-out infinite;}
-.sdot.err{background:#e74c3c;box-shadow:0 0 5px #e74c3c;}
-.sdot.loading{background:var(--gold2);animation:blink .5s ease-in-out infinite;}
+.sdot{width:7px;height:7px;border-radius:50%;background:#2ecc71;box-shadow:0 0 6px #2ecc71;animation:blink 2s ease-in-out infinite;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
 .stxt{font-size:9px;color:rgba(255,255,255,.5);letter-spacing:.5px;}
-
-/* FIREBASE BADGE */
-.fb-badge{display:flex;align-items:center;gap:5px;background:rgba(66,133,244,.15);border:1px solid rgba(66,133,244,.3);border-radius:20px;padding:3px 10px;}
-.fb-dot{width:6px;height:6px;border-radius:50%;background:#4a90e2;box-shadow:0 0 5px #4a90e2;}
-.fb-txt{font-size:9px;color:rgba(255,255,255,.6);letter-spacing:.5px;}
-
 #clk{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:rgba(255,255,255,.35);text-align:right;line-height:1.4;}
 
 /* FILTRO FECHA */
-.date-bar{background:var(--sf);border-bottom:1px solid var(--bd);padding:9px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.date-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t2);white-space:nowrap;}
+.date-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.date-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t2);}
 .date-pills{display:flex;gap:6px;flex-wrap:wrap;}
-.dp{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;padding:5px 13px;border-radius:20px;border:1.5px solid var(--bd);background:var(--sf2);color:var(--t2);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.dp{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface2);color:var(--t2);cursor:pointer;transition:all .2s;white-space:nowrap;}
 .dp:hover{border-color:var(--navy);color:var(--navy);}
 .dp.active{background:var(--navy);border-color:var(--navy);color:#fff;}
-.date-info{font-size:10px;color:var(--t3);margin-left:auto;font-style:italic;white-space:nowrap;}
+.date-info{font-size:10px;color:var(--t3);margin-left:auto;font-style:italic;}
 
-/* KPI BAR */
-.kpi-bar{display:flex;gap:10px;padding:12px 24px;background:var(--sf);border-bottom:1px solid var(--bd);overflow-x:auto;}
-.kpi-card{flex:1;min-width:130px;border:1px solid var(--bd);border-top:3px solid;border-radius:var(--r);padding:13px 16px;background:var(--sf);box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;}
+.kpi-bar{display:flex;gap:10px;padding:12px 24px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;}
+.kpi-card{flex:1;min-width:130px;border:1px solid var(--border);border-top:3px solid;border-radius:var(--r);padding:13px 16px;background:var(--surface);box-shadow:var(--sh);transition:box-shadow .2s,transform .2s;}
 .kpi-card:hover{box-shadow:var(--sh2);transform:translateY(-1px);}
-.kpi-card.nv{border-top-color:var(--navy);}.kpi-card.gd{border-top-color:var(--gold);}
-.kpi-card.gn{border-top-color:var(--green);}.kpi-card.st{border-top-color:var(--steel);}
+.kpi-card.nv{border-top-color:var(--navy);}
+.kpi-card.gd{border-top-color:var(--gold);}
+.kpi-card.gn{border-top-color:var(--green);}
+.kpi-card.st{border-top-color:var(--steel);}
 .klbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-bottom:5px;}
 .kval{font-family:'Barlow Condensed',sans-serif;font-size:23px;font-weight:700;line-height:1;color:var(--t1);}
-.kpi-card.gd .kval{color:var(--gold);}.kpi-card.gn .kval{color:var(--green);}.kpi-card.st .kval{color:var(--steel);}
+.kpi-card.gd .kval{color:var(--gold);}
+.kpi-card.gn .kval{color:var(--green);}
+.kpi-card.st .kval{color:var(--steel);}
 .ksub{font-size:10px;color:var(--t3);margin-top:3px;}
-.kmbar{height:3px;background:var(--bd);border-radius:2px;margin-top:7px;overflow:hidden;}
+.kmbar{height:3px;background:var(--border);border-radius:2px;margin-top:7px;overflow:hidden;}
 .kmfill{height:3px;border-radius:2px;transition:width 1s ease;}
 
-/* TABS */
-.tabs-nav{display:flex;background:var(--sf);border-bottom:2px solid var(--bd);padding:0 24px;overflow-x:auto;}
+.tabs-nav{display:flex;background:var(--surface);border-bottom:2px solid var(--border);padding:0 24px;overflow-x:auto;}
 .tbtn{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:13px 18px;color:var(--t3);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:color .2s,border-color .2s;display:flex;align-items:center;gap:7px;}
-.tbtn:hover{color:var(--t2);}.tbtn.active{color:var(--navy);border-bottom-color:var(--navy);}
-.tcnt{background:var(--sf2);border:1px solid var(--bd);border-radius:12px;font-size:9px;padding:1px 7px;color:var(--t3);}
+.tbtn:hover{color:var(--t2);}
+.tbtn.active{color:var(--navy);border-bottom-color:var(--navy);}
+.tcnt{background:var(--surface2);border:1px solid var(--border);border-radius:12px;font-size:9px;padding:1px 7px;color:var(--t3);}
 .tbtn.active .tcnt{background:var(--navy);border-color:var(--navy);color:#fff;}
 
-/* PANELS */
 .panel{display:none;padding:18px 24px;}
 .panel.active{display:block;animation:fi .25s ease;}
 @keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+
 .lsum{display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap;}
-.lstat{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:10px 15px;flex:1;min-width:110px;box-shadow:var(--sh);}
+.lstat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 15px;flex:1;min-width:110px;box-shadow:var(--sh);}
 .lsl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);}
 .lsv{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;color:var(--t1);margin-top:2px;}
 
-/* LEGEND */
-.legend{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:10px;color:var(--t2);flex-wrap:wrap;}
-.legend strong{color:var(--t1);font-weight:600;font-size:10px;}
-.li{display:flex;align-items:center;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:6px;padding:3px 8px;}
+/* LEYENDA */
+.legend{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:10px;color:var(--t2);flex-wrap:wrap;}
+.legend strong{color:var(--t1);font-weight:600;font-size:11px;}
+.li{display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:3px 8px;}
 .ld{width:7px;height:7px;border-radius:50%;}
 
-/* FIREBASE SAVE INDICATOR */
-.li-fb{display:flex;align-items:center;gap:5px;background:rgba(66,133,244,.08);border:1px solid rgba(66,133,244,.25);border-radius:6px;padding:3px 8px;font-size:10px;color:#4a90e2;}
-
-/* SILO GRID */
 .sgrid{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;}
-.sc{display:flex;flex-direction:column;align-items:center;background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:8px 6px 10px;cursor:pointer;box-shadow:var(--sh);transition:border-color .2s,transform .15s,box-shadow .2s;position:relative;}
+
+.sc{display:flex;flex-direction:column;align-items:center;background:var(--surface);border:2px solid var(--border);border-radius:var(--r);padding:8px 6px 10px;cursor:pointer;box-shadow:var(--sh);transition:border-color .2s,transform .15s,box-shadow .2s;position:relative;}
 .sc:hover{transform:translateY(-3px);box-shadow:var(--sh2);}
 .sc.s1{border-color:#167848;}.sc.s0{border-color:#2a6888;}.sc.sm1{border-color:#982828;}
 .sc.s2{border-color:#c07818;}.sc.sm2{border-color:#8b44ac;}
@@ -110,21 +97,24 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
 .smat{font-size:8px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px;max-width:100%;margin-top:1px;font-weight:500;}
 .sstock{border-radius:6px;padding:2px 8px;margin-top:4px;font-size:9px;font-weight:600;font-family:'Barlow Condensed',sans-serif;}
 .scap{font-size:7px;color:var(--t3);margin-top:1px;}
-.spbar{width:82%;height:3px;background:var(--bd);border-radius:2px;margin-top:4px;overflow:hidden;}
+.spbar{width:82%;height:3px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden;}
 .spfill{height:3px;border-radius:2px;transition:width 1s;}
 .sest{font-size:8px;font-weight:600;margin-top:3px;}
-.ebadge{position:absolute;top:7px;right:7px;background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:1px 5px;font-size:7px;color:var(--t3);letter-spacing:1px;}
+.ebadge{position:absolute;top:7px;right:7px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:7px;color:var(--t3);letter-spacing:1px;}
 
-/* SAVING INDICATOR on card */
-.sc.saving::after{content:'💾';position:absolute;top:6px;left:6px;font-size:10px;animation:fadeout 2s forwards;}
-@keyframes fadeout{0%{opacity:1;}80%{opacity:1;}100%{opacity:0;}}
-
-/* LOADING */
 #loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:14px;}
-.spinner{width:40px;height:40px;border:3px solid var(--bd2);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;}
+.spinner{width:40px;height:40px;border:3px solid var(--border2);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .ltxt{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;}
-::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px;}
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* FIREBASE BADGE */
+.fb-badge{display:flex;align-items:center;gap:5px;background:rgba(66,133,244,.15);border:1px solid rgba(66,133,244,.3);border-radius:20px;padding:3px 11px;}
+.fb-dot{width:6px;height:6px;border-radius:50%;background:#4a90e2;}
+.fb-dot.ok{background:#4a90e2;box-shadow:0 0 6px #4a90e2;animation:blink 2s ease-in-out infinite;}
+.fb-dot.err{background:#e74c3c;box-shadow:0 0 5px #e74c3c;}
+.fb-dot.loading{background:#e09820;animation:blink .5s ease-in-out infinite;}
+.fb-txt{font-size:9px;color:rgba(255,255,255,.55);letter-spacing:.5px;}
 </style>
 </head>
 <body>
@@ -133,18 +123,13 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
   <div class="hbrand"><div class="hicon">🌾</div><div><div class="htitle">ALMACENERA S.A.</div><div class="hsub">Control de Inventario · Silos & Bodegas</div></div></div>
   <div class="hkpis" id="hkpis"></div>
   <div class="hright">
-    <div class="fb-badge"><div class="fb-dot" id="fbDot"></div><span class="fb-txt" id="fbTxt">Firebase…</span></div>
-    <div class="spill"><div class="sdot loading" id="sdot"></div><span class="stxt" id="stxt">Cargando…</span></div>
+    <div class="spill"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Cargando…</span></div>
+    <div class="fb-badge"><div class="fb-dot loading" id="fbDot"></div><span class="fb-txt" id="fbTxt">Firebase…</span></div>
     <div id="clk"></div>
   </div>
 </header>
 
-
-<!-- DEBUG PANEL - se oculta automáticamente cuando los datos cargan -->
-<div id="debugPanel" style="background:#1a2e3e;border-bottom:2px solid #2a4a60;padding:10px 24px;font-family:monospace;font-size:10px;color:#7af0a0;display:none;">
-  <div style="font-weight:700;color:#4af0c0;margin-bottom:4px;">🔍 DIAGNÓSTICO CSV (F12 para más detalle)</div>
-  <div id="debugContent" style="line-height:1.7;white-space:pre-wrap;"></div>
-</div>
+<!-- FILTRO DE FECHA -->
 <div class="date-bar" id="dateBar" style="display:none">
   <span class="date-label">📅 Inventario:</span>
   <div class="date-pills" id="datePills"></div>
@@ -152,13 +137,39 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
 </div>
 
 <div class="kpi-bar" id="kbar"></div>
-<nav class="tabs-nav"  id="tnav"></nav>
+<nav class="tabs-nav" id="tnav"></nav>
 <main id="main"><div id="loading"><div class="spinner"></div><div class="ltxt">Cargando datos…</div></div></main>
 
 <script>
-/* ══════════════════════════════════════════════════════
-   FIREBASE CONFIG — proyecto agripac-control
-══════════════════════════════════════════════════════ */
+/* ══ URLs ══════════════════════════════════════════════ */
+var URL_INV='https://docs.google.com/spreadsheets/d/e/2PACX-1vQsHD68GsN5kH9NtuQF5g_Q_lTQmJEv6YDnLfnd6zurixDZrkw-7loPPxlBEC3khaX3vnlM4eFNuXBy/pub?gid=0&single=true&output=csv';
+var URL_EST='https://docs.google.com/spreadsheets/d/e/2PACX-1vQsHD68GsN5kH9NtuQF5g_Q_lTQmJEv6YDnLfnd6zurixDZrkw-7loPPxlBEC3khaX3vnlM4eFNuXBy/pub?gid=349286573&single=true&output=csv';
+
+/* ══ ESTADOS DEL GRANO (5 opciones — clic cíclico) ══════
+   1  = ▲  Llenando     (cono arriba)
+   0  = ➖  Estable      (plano)
+  -1  = ▼  Vaciando     (cono abajo)
+   2  = ╱  Inclinado45  (rampa 45°)
+  -2  = ∧∧ Doble montaña
+═══════════════════════════════════════════════════════ */
+var SC={
+  '1' :{i:'▲', l:'LLENANDO',   c:'#167848', cl:'s1'},
+  '0' :{i:'➖', l:'ESTABLE',    c:'#2a6888', cl:'s0'},
+  '-1':{i:'▼', l:'VACIANDO',   c:'#982828', cl:'sm1'},
+  '2' :{i:'╱', l:'INCLINADO',  c:'#c07818', cl:'s2'},
+  '-2':{i:'∧∧',l:'DOBLE PICO', c:'#8b44ac', cl:'sm2'}
+};
+var STATE_ORDER=[1,0,-1,2,-2];  /* ciclo al hacer clic */
+
+var GS={}, INV={}, EST=[], TAB=0;
+/* ALL_INV[fechaISO][cod] = {kg,m} — para filtro de fecha */
+var ALL_INV={}, ALL_DATES=[], SEL_DATE=null;
+
+
+/* ══ FIREBASE — agripac-control ══════════════════════════════════════════
+   Colección: silos_estados  |  Documento: almacenera
+   Guarda/escucha el estado del grano de cada silo en tiempo real
+══════════════════════════════════════════════════════════════════════════ */
 firebase.initializeApp({
   apiKey:            'AIzaSyANUkQlUGrMh4ET1LdyYCucuZqqVKR39u4',
   authDomain:        'agripac-control.firebaseapp.com',
@@ -170,88 +181,42 @@ firebase.initializeApp({
   measurementId:     'G-J4MGT2J80C'
 });
 var fbDB = firebase.firestore();
+var FB_COL = 'silos_estados';
+var FB_DOC = 'almacenera';
 
-/* Colección y documento donde se guardan los estados */
-var FB_COL  = 'silos_estados';
-var FB_DOC  = 'almacenera';
+function setFbUI(state){
+  var dot=document.getElementById('fbDot');
+  var txt=document.getElementById('fbTxt');
+  if(state==='ok')  { dot.className='fb-dot ok';  txt.textContent='🔥 Sincronizado'; }
+  else if(state==='err'){ dot.className='fb-dot err'; txt.textContent='Firebase error'; }
+  else              { dot.className='fb-dot loading'; txt.textContent='Firebase…'; }
+}
 
-/* ══════════════════════════════════════════════════════
-   URLs Google Sheets
-══════════════════════════════════════════════════════ */
-var URL_INV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQsHD68GsN5kH9NtuQF5g_Q_lTQmJEv6YDnLfnd6zurixDZrkw-7loPPxlBEC3khaX3vnlM4eFNuXBy/pub?gid=0&single=true&output=csv';
-var URL_EST = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQsHD68GsN5kH9NtuQF5g_Q_lTQmJEv6YDnLfnd6zurixDZrkw-7loPPxlBEC3khaX3vnlM4eFNuXBy/pub?gid=349286573&single=true&output=csv';
+/* Guarda el estado de UN silo en Firestore */
+function saveEstado(nom, estado){
+  var upd={};  upd[nom]=estado;
+  fbDB.collection(FB_COL).doc(FB_DOC)
+    .set(upd,{merge:true})
+    .catch(function(e){console.error('[FB save]',e);});
+}
 
-/* ══════════════════════════════════════════════════════
-   5 ESTADOS DEL GRANO — ciclo por clic
-   1  ▲ Llenando    (cono arriba)
-   0  ➖ Estable     (plano)
-  -1  ▼ Vaciando    (cono abajo)
-   2  ╱ Inclinado   (rampa 45°)
-  -2  ∧∧ Doble pico  (dos montañas)
-══════════════════════════════════════════════════════ */
-var SC = {
-  '1' :{i:'▲', l:'LLENANDO',   c:'#167848', cl:'s1'},
-  '0' :{i:'➖', l:'ESTABLE',    c:'#2a6888', cl:'s0'},
-  '-1':{i:'▼', l:'VACIANDO',   c:'#982828', cl:'sm1'},
-  '2' :{i:'╱', l:'INCLINADO',  c:'#c07818', cl:'s2'},
-  '-2':{i:'∧∧',l:'DOBLE PICO', c:'#8b44ac', cl:'sm2'}
-};
-var STATE_ORDER = [1, 0, -1, 2, -2];
-
-/* ══ ESTADO GLOBAL ══════════════════════════════════ */
-var GS = {};          /* {nomSilo: estadoNum} — cargado desde Firebase */
-var INV = {};         /* {cod: {kg,m}} — para fecha seleccionada */
-var EST = [];         /* estructura de silos */
-var ALL_INV = {};     /* {fechaISO: {cod:{kg,m}}} */
-var ALL_DATES = [];
-var SEL_DATE = null;
-var TAB = 0;
-var FB_READY = false; /* true cuando Firebase cargó los estados */
-var CSV_READY = false;/* true cuando CSV cargó */
-
-/* ══ FIREBASE — LEER Y ESCUCHAR ESTADOS EN TIEMPO REAL ══ */
+/* Escucha cambios en tiempo real — actualiza GS y re-renderiza */
 function initFirebase(){
-  setFbState('connecting','Conectando…');
   fbDB.collection(FB_COL).doc(FB_DOC)
     .onSnapshot(function(snap){
       if(snap.exists){
-        var data = snap.data();
-        /* Actualizar GS con lo que viene de Firebase */
-        Object.keys(data).forEach(function(k){ GS[k] = data[k]; });
+        var data=snap.data();
+        Object.keys(data).forEach(function(k){ GS[k]=data[k]; });
       }
-      setFbState('ok','Estados en tiempo real');
-      FB_READY = true;
-      if(CSV_READY) render(); /* re-render con estados actualizados */
+      setFbUI('ok');
+      if(EST.length) render();   /* re-render cuando llegan cambios */
     }, function(err){
-      console.error('[Firebase]',err);
-      setFbState('err','Error Firebase');
+      console.error('[FB listen]',err);
+      setFbUI('err');
     });
 }
 
-/* ══ GUARDAR ESTADO EN FIREBASE ════════════════════ */
-function saveStateToFirebase(nom, estado){
-  var update = {};
-  update[nom] = estado;
-  fbDB.collection(FB_COL).doc(FB_DOC)
-    .set(update, {merge:true})
-    .then(function(){
-      console.log('[Firebase] Estado guardado:',nom,'=',estado);
-    })
-    .catch(function(err){
-      console.error('[Firebase] Error al guardar:',err);
-    });
-}
-
-function setFbState(s, txt){
-  var dot = document.getElementById('fbDot');
-  var tEl = document.getElementById('fbTxt');
-  if(s==='ok'){    dot.style.background='#4a90e2'; dot.style.boxShadow='0 0 6px #4a90e2'; }
-  else if(s==='err'){dot.style.background='#e74c3c'; dot.style.boxShadow='0 0 5px #e74c3c'; }
-  else{            dot.style.background='#e09820'; dot.style.boxShadow='0 0 5px #e09820'; }
-  tEl.textContent = txt;
-}
-
-/* ══ UTILS ══════════════════════════════════════════ */
+/* ══ UTILS ═══════════════════════════════════════════ */
 function normCode(r){return parseInt(String(r||'').trim().replace(/^0+/,''))||0;}
 function pn(s){
   if(typeof s==='number')return s;
@@ -268,33 +233,15 @@ function pb(p){return p>=85?'rgba(152,40,40,.1)':p>=50?'rgba(176,96,16,.1)':'rgb
 function pt(p){return p>=85?'#c03030':p>=50?'#c87018':'#189858';}
 function mapTipo(r){r=String(r||'').toUpperCase();if(r.indexOf('CONICO')>-1||r.indexOf('PULMON')>-1||r.indexOf('PULMÓN')>-1)return 'PULMON';if(r.indexOf('BODEGA')>-1)return 'BODEGA';if(r.indexOf('TOLVA')>-1)return 'TOLVA';return 'SILO';}
 function normDate(s){
-  s=String(s||'').trim().replace(/"/g,'');
-  if(!s||s.toUpperCase()==='FECHA'||s.toUpperCase()==='DATE')return null;
+  s=String(s||'').trim();if(!s)return null;
   var m;
-  /* YYYY-MM-DD o YYYY/MM/DD */
-  if((m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/)))
-    return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
-  /* DD/MM/YYYY o DD-MM-YYYY */
-  if((m=s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/)))
-    return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
-  /* Número serial de Excel/Sheets (ej: 46197) */
-  if(/^\d{5}$/.test(s)){
-    var d=new Date(Date.UTC(1899,11,30)+(parseInt(s)*86400000));
-    if(!isNaN(d))return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');
-  }
-  /* parseo nativo como último recurso */
-  var d2=new Date(s);
-  if(!isNaN(d2.getTime()))return d2.getFullYear()+'-'+String(d2.getMonth()+1).padStart(2,'0')+'-'+String(d2.getDate()).padStart(2,'0');
-  return null;
+  if((m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/)))return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+  if((m=s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/)))return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+  var d=new Date(s);return isNaN(d)?null:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 function fmtDate(iso){if(!iso)return'—';var p=iso.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
-function setSyncCsv(ok,txt){
-  var d=document.getElementById('sdot');
-  d.className='sdot '+(ok?'csv':'err');
-  document.getElementById('stxt').textContent=txt;
-}
 
-/* ══ CSV PARSER ═════════════════════════════════════ */
+/* ══ CSV ═════════════════════════════════════════════ */
 function parseCSV(txt){
   var rows=[],cur=[],cell='',inQ=false;
   for(var i=0;i<txt.length;i++){
@@ -312,7 +259,7 @@ function parseCSV(txt){
   return{hdr:hdr,rows:rows.slice(1).filter(function(r){return r.some(function(c){return c;});}).map(function(r){var o={};hdr.forEach(function(h,j){o[h]=(r[j]||'').replace(/"/g,'').trim();});o._r=r;return o;})};
 }
 
-/* ══ ESTRUCTURA ═════════════════════════════════════ */
+/* ══ ESTRUCTURA ══════════════════════════════════════ */
 function buildEST(p){
   var est=[];
   p.rows.forEach(function(r){
@@ -329,77 +276,29 @@ function buildEST(p){
   return est;
 }
 
-/* ══ INVENTARIO AGRUPADO POR FECHA ════════════════════
-   Col A (idx 0) = FECHA
-   Col C (idx 2) = Nombre producto (Texto breve de material)
-   Col E (idx 4) = Código Almacén ("0012" → 12)
-   Col G (idx 6) = Libre utilización (KG)
+/* ══ INVENTARIO por Fecha ════════════════════════════
+   Col A (0) = FECHA
+   Col C (2) = Texto breve de material (nombre producto)
+   Col E (4) = Almacén (código "0012"→12)
+   Col G (6) = Libre utilización (KG)
 ══════════════════════════════════════════════════════ */
-function showDebug(html){
-  var p=document.getElementById('debugPanel');
-  var c=document.getElementById('debugContent');
-  if(p&&c){p.style.display='block';c.innerHTML=html;}
-}
-
 function buildALL(p){
   var allInv={}, dateSet={};
-  /* ── Debug visible ── */
-  var dbg='';
-  dbg+='Total filas CSV: <b>'+p.rows.length+'</b>\n';
-  if(p.rows.length>0){
-    var r0=p.rows[0]._r||[];
-    dbg+='Col A (Fecha):   <b style=\'color:#ffdd88\'>'+(r0[0]||'VACÍO')+'</b>  → normDate: <b>'+(normDate(r0[0]||'')||'NULL ⚠️')+'</b>\n';
-    dbg+='Col C (Nombre):  <b style=\'color:#88ffdd\'>'+(r0[2]||'VACÍO')+'</b>\n';
-    dbg+='Col E (Almacén): <b style=\'color:#88ddff\'>'+(r0[4]||'VACÍO')+'</b>  → normCode: <b>'+(normCode(r0[4]||'')||'NULL ⚠️')+'</b>\n';
-    dbg+='Col G (KG):      <b style=\'color:#ffaa88\'>'+(r0[6]||'VACÍO')+'</b>  → pn(): <b>'+pn(r0[6]||'')+'</b>\n';
-    if(p.rows.length>1){var r1=p.rows[1]._r||[];dbg+='Fila 2 completa: '+r1.slice(0,8).join(' | ')+'\n';}
-  }else{dbg+='<span style=\'color:#ff6666\'>⚠️ CSV vacío — verifica que la hoja esté publicada correctamente</span>\n';}
-  showDebug(dbg);
-  console.log('[CSV INV] Total filas:', p.rows.length);
-  if(p.rows.length>0){
-    console.log('[CSV INV] Encabezados:', p.hdr ? p.hdr.join(' | ') : 'sin hdr');
-    console.log('[CSV INV] Fila 1 raw:', (p.rows[0]._r||[]).slice(0,8).join(' | '));
-    console.log('[CSV INV] Fila 1 Col A(fecha):', (p.rows[0]._r||[])[0]);
-    console.log('[CSV INV] Fila 1 Col E(alm):',   (p.rows[0]._r||[])[4]);
-    console.log('[CSV INV] Fila 1 Col G(kg):',    (p.rows[0]._r||[])[6]);
-    console.log('[CSV INV] normDate fila1:', normDate((p.rows[0]._r||[])[0]||''));
-    console.log('[CSV INV] normCode fila1:', normCode((p.rows[0]._r||[])[4]||''));
-  }
   p.rows.forEach(function(r){
     var row=r._r||[];
-    var fechaISO = normDate(row[0]||'');
-    var cod      = normCode(row[4]||r['Almacén']||r['Almacen']||'');
-    var mat      = String(row[2]||r['Texto breve de material']||'').trim();
-    var kg       = pn(row[6]||r['Libre utilización']||'0');
+    var fechaISO=normDate(row[0]||'');
+    var cod=normCode(row[4]||r['Almacén']||r['Almacen']||'');
+    var mat=String(row[2]||r['Texto breve de material']||'').trim();
+    var kg=pn(row[6]||r['Libre utilización']||'0');
     if(!cod||!fechaISO)return;
     if(!allInv[fechaISO])allInv[fechaISO]={};
     if(!allInv[fechaISO][cod])allInv[fechaISO][cod]={kg:0,m:'',_mx:0};
     allInv[fechaISO][cod].kg+=kg;
-    if(mat&&Math.abs(kg)>allInv[fechaISO][cod]._mx){
-      allInv[fechaISO][cod].m=mat;
-      allInv[fechaISO][cod]._mx=Math.abs(kg);
-    }
+    if(mat&&Math.abs(kg)>allInv[fechaISO][cod]._mx){allInv[fechaISO][cod].m=mat;allInv[fechaISO][cod]._mx=Math.abs(kg);}
     dateSet[fechaISO]=true;
   });
-  var dates2=Object.keys(dateSet).sort().reverse();
-  console.log('[CSV INV] Fechas encontradas:', dates2.length, dates2.join(', '));
-  /* Actualizar debug panel con resultado */
-  var panel=document.getElementById('debugContent');
-  if(panel){
-    if(dates2.length>0){
-      panel.innerHTML+=('\n✅ Fechas encontradas: <b>'+dates2.join(', ')+'</b>\n');
-      panel.innerHTML+=('✅ Almacenes con datos: <b>'+Object.keys(allInv[dates2[0]]||{}).join(', ')+'</b>');
-      /* Ocultar debug panel después de 8 segundos si todo OK */
-      setTimeout(function(){
-        var dp=document.getElementById('debugPanel');
-        if(dp)dp.style.display='none';
-      },8000);
-    }else{
-      panel.innerHTML+=('\n<span style=\'color:#ff6666\'>⚠️ CERO fechas detectadas — el normDate no pudo parsear la columna A</span>\n');
-      panel.innerHTML+=('Revisa el formato de fecha en tu Google Sheet y comparte una captura.');
-    }
-  }
-  return{allInv:allInv, dates:dates2};
+  var dates=Object.keys(dateSet).sort().reverse();
+  return{allInv:allInv,dates:dates};
 }
 
 function applyDate(iso){
@@ -413,7 +312,6 @@ function applyDate(iso){
   INV=inv;
 }
 
-/* ══ DATE PILLS ══════════════════════════════════════ */
 function buildDatePills(){
   document.getElementById('dateBar').style.display='flex';
   var c=document.getElementById('datePills');
@@ -425,23 +323,23 @@ function buildDatePills(){
     btn.dataset.date=iso;
     btn.addEventListener('click',function(){
       applyDate(this.dataset.date);
-      buildDatePills();
-      render();
+      buildDatePills();render();
     });
     c.appendChild(btn);
   });
-  var n=Object.keys(ALL_INV[SEL_DATE]||{}).filter(function(k){return (ALL_INV[SEL_DATE][k]||{}).kg>0;}).length;
+  var n=Object.keys(ALL_INV[SEL_DATE]||{}).filter(function(k){return ALL_INV[SEL_DATE][k].kg>0;}).length;
   document.getElementById('dateInfo').textContent=n+' almacenes con stock · '+fmtDate(SEL_DATE);
 }
 
-/* ══ LOAD CSV ════════════════════════════════════════ */
+/* ══ SYNC ════════════════════════════════════════════ */
+function setSync(ok,txt){
+  var dot=document.getElementById('sdot');
+  dot.style.cssText='background:'+(ok?'#2ecc71':'#e74c3c')+';box-shadow:0 0 6px '+(ok?'#2ecc71':'#e74c3c');
+  document.getElementById('stxt').textContent=txt;
+}
+
+/* ══ LOAD ════════════════════════════════════════════ */
 function load(){
-  document.getElementById('sdot').className='sdot loading';
-  document.getElementById('stxt').textContent='Actualizando…';
-  /* Mostrar date bar con estado de carga */
-  document.getElementById('dateBar').style.display='flex';
-  document.getElementById('datePills').innerHTML='<span style="font-size:10px;color:#7a98b0;font-style:italic;">Cargando fechas…</span>';
-  document.getElementById('dateInfo').textContent='';
   Promise.all([
     fetch(URL_INV+'&_t='+Date.now()).then(function(r){return r.text();}),
     fetch(URL_EST+'&_t='+Date.now()).then(function(r){return r.text();})
@@ -454,53 +352,60 @@ function load(){
     ALL_INV=built.allInv; ALL_DATES=built.dates;
     if(ALL_DATES.length&&(!SEL_DATE||ALL_DATES.indexOf(SEL_DATE)===-1))SEL_DATE=ALL_DATES[0];
     applyDate(SEL_DATE);
-    setSyncCsv(true,'En vivo · '+new Date().toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}));
+    setSync(true,'En vivo · '+new Date().toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}));
     document.getElementById('loading').style.display='none';
-    CSV_READY=true;
-    buildDatePills();
-    render();
+    buildDatePills();render();
   }).catch(function(err){
-    console.error('[LOAD ERROR]',err);
-    setSyncCsv(false,'Error: '+err.message);
-    document.getElementById('loading').style.display='none';
-    document.getElementById('main').innerHTML=
-      '<div style="margin:40px auto;max-width:500px;background:#fff;border:1px solid #d8e2ec;border-left:4px solid #982828;border-radius:10px;padding:20px 24px;">'
-      +'<div style="font-family:Barlow Condensed,sans-serif;font-size:16px;font-weight:700;color:#982828;margin-bottom:8px;">⚠️ Error al cargar el CSV</div>'
-      +'<div style="font-size:11px;color:#3a5870;line-height:1.6;margin-bottom:12px;">'+err.message+'<br><br>'
-      +'Verifica en la <strong>consola (F12)</strong> los detalles del error.<br>'
-      +'Asegúrate que las hojas estén publicadas en Google Sheets: <em>Archivo → Compartir → Publicar en la web → CSV</em></div>'
-      +'<button onclick="load()" style="background:#0c2840;border:none;border-radius:8px;padding:9px 18px;font-family:Barlow Condensed,sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;color:#fff;cursor:pointer;">🔄 Reintentar</button>'
-      +'</div>';
+    console.error(err);setSync(false,'Error de conexión');
   });
 }
 
-/* ══ SVG — GRAIN POLY (5 formas) ═════════════════════
-   est= 1 → ▲ cono arriba
-   est= 0 → ➖ plano
-   est=-1 → ▼ cráter abajo
-   est= 2 → ╱ rampa 45° (izq baja, der alta)
-   est=-2 → ∧∧ doble montaña
+/* ══ SVG — GRAIN POLY (5 formas) ════════════════════
+   est=1  → ▲ pico arriba  (cono)
+   est=0  → ➖ plano
+   est=-1 → ▼ cráter abajo (cono invertido)
+   est=2  → ╱ rampa 45° (de izq-abajo a der-arriba)
+   est=-2 → ∧∧ doble pico (dos montañas)
 ══════════════════════════════════════════════════════ */
 function grainPoly(rx,rr,cx,bT,bB,flatY,est){
+  if(!est&&est!==0)est=1;
   var bH=bB-bT, pk=Math.round(bH*0.13);
   var peakY=Math.max(bT+4,flatY-pk);
   var dipY =Math.min(bB-4,flatY+pk);
-  var q1=Math.round(rx+(rr-rx)*0.25), q3=Math.round(rx+(rr-rx)*0.75);
+  var mid  =Math.round((rx+rr)/2);
 
-  if(est===1)   /* ▲ pico central */
+  if(est===1)
+    /* ▲ pico central arriba */
     return rx+','+bB+' '+rr+','+bB+' '+rr+','+flatY+' '+cx+','+peakY+' '+rx+','+flatY;
-  if(est===-1)  /* ▼ cráter central */
+
+  if(est===-1)
+    /* ▼ cráter central abajo */
     return rx+','+bB+' '+rr+','+bB+' '+rr+','+flatY+' '+cx+','+dipY+' '+rx+','+flatY;
-  if(est===0)   /* ➖ plano */
+
+  if(est===0)
+    /* ➖ superficie plana */
     return rx+','+bB+' '+rr+','+bB+' '+rr+','+flatY+' '+rx+','+flatY;
-  if(est===2){  /* ╱ rampa 45°: izq baja, der alta */
-    var lY=Math.min(bB-2,flatY+pk), rY=Math.max(bT+4,flatY-pk);
-    return rx+','+bB+' '+rr+','+bB+' '+rr+','+rY+' '+rx+','+lY;
+
+  if(est===2){
+    /* ╱ rampa 45°: izquierda baja, derecha alta */
+    var leftY =Math.min(bB-2, flatY+pk);
+    var rightY=Math.max(bT+4, flatY-pk);
+    return rx+','+bB+' '+rr+','+bB+' '+rr+','+rightY+' '+rx+','+leftY;
   }
-  if(est===-2){ /* ∧∧ doble montaña */
-    var valY=Math.min(bB-2,flatY+Math.round(pk*0.4));
-    return rx+','+bB+' '+rr+','+bB+' '+rr+','+flatY+' '+q3+','+peakY+' '+cx+','+valY+' '+q1+','+peakY+' '+rx+','+flatY;
+
+  if(est===-2){
+    /* ∧∧ doble pico: dos montañas simétricas */
+    var q1=Math.round(rx+(rr-rx)*0.25);  /* 1er cuarto */
+    var q3=Math.round(rx+(rr-rx)*0.75);  /* 3er cuarto */
+    var valY=Math.min(bB-2,flatY+Math.round(pk*0.5)); /* valle entre picos */
+    return rx+','+bB+' '+rr+','+bB
+      +' '+rr+','+flatY
+      +' '+q3+','+peakY
+      +' '+mid+','+valY
+      +' '+q1+','+peakY
+      +' '+rx+','+flatY;
   }
+
   return rx+','+bB+' '+rr+','+bB+' '+rr+','+flatY+' '+rx+','+flatY;
 }
 
@@ -514,108 +419,108 @@ function mkDefs(id){
   +'<linearGradient id="bw'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9ab8ca"/><stop offset="100%" stop-color="#6888a0"/></linearGradient>'
   +'</defs>';
 }
-function corrug(rx,rr,bT,bB,fY){var s='',st=Math.max(3,Math.round((bB-bT)/24));for(var y=bT+st;y<bB;y+=st)s+='<line x1="'+rx+'" y1="'+y+'" x2="'+rr+'" y2="'+y+'" stroke="'+(y<fY?'#284860':'#806018')+'" stroke-width="0.65" opacity="'+(y<fY?'0.45':'0.5')+'"/>';return s;}
-function seams(rx,bw,bT,bB,n){var s='';for(var i=1;i<n;i++){var x=rx+bw*i/n;s+='<line x1="'+x+'" y1="'+bT+'" x2="'+x+'" y2="'+bB+'" stroke="#1e3a50" stroke-width="0.4" opacity="0.3"/>';}return s;}
-function stair(rx,rr,bT,bB,W){var bw=rr-rx,x1=rr-W*.05,y1=bB-4,x2=rx+bw*.30,y2=bT+6,off=W*.045,n=Math.round((bB-bT)/Math.max(8,W*.09));var s='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#d8a010" stroke-width="'+Math.max(2,W*.030)+'" stroke-linecap="round" opacity="0.95"/><line x1="'+(x1-off)+'" y1="'+y1+'" x2="'+(x2-off)+'" y2="'+y2+'" stroke="#d8a010" stroke-width="'+Math.max(1.5,W*.022)+'" stroke-linecap="round" opacity="0.95"/>';for(var i=0;i<=n;i++){var t=i/n,sx=x1+(x2-x1)*t,sy=y1+(y2-y1)*t;s+='<line x1="'+sx+'" y1="'+sy+'" x2="'+(sx-off)+'" y2="'+sy+'" stroke="#d8a010" stroke-width="'+Math.max(1,W*.016)+'"/>';}return s;}
-function pctB(cx,y,pct,fsz,col){var bw=fsz*3,bh=fsz+5;return '<rect x="'+(cx-bw/2)+'" y="'+y+'" width="'+bw+'" height="'+bh+'" rx="'+(bh/2)+'" fill="rgba(8,16,28,.72)"/><text x="'+cx+'" y="'+(y+bh-3)+'" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="'+fsz+'" font-weight="700" fill="'+col+'">'+pct+'%</text>';}
-function stB(cx,y,r,s){return '<circle cx="'+cx+'" cy="'+y+'" r="'+r+'" fill="'+s.c+'" opacity="0.9"/><text x="'+cx+'" y="'+(y+r*.42)+'" text-anchor="middle" font-family="sans-serif" font-size="'+(r*1.3)+'" fill="#fff" font-weight="700">'+s.i+'</text>';}
+function corrug(rx,rr,bT,bB,flatY,H){var s='',st=Math.max(3,Math.round((bB-bT)/24));for(var y=bT+st;y<bB;y+=st)s+='<line x1="'+rx+'" y1="'+y+'" x2="'+rr+'" y2="'+y+'" stroke="'+(y<flatY?'#284860':'#806018')+'" stroke-width="0.65" opacity="'+(y<flatY?'0.45':'0.5')+'"/>';return s;}
+function vertSeams(rx,bw,bT,bB,n){var s='';for(var i=1;i<n;i++){var x=rx+bw*i/n;s+='<line x1="'+x+'" y1="'+bT+'" x2="'+x+'" y2="'+bB+'" stroke="#1e3a50" stroke-width="0.4" opacity="0.3"/>';}return s;}
+function diagStair(rx,rr,bT,bB,W){var bw=rr-rx,x1=rr-W*0.05,y1=bB-4,x2=rx+bw*0.30,y2=bT+6,off=W*0.045,steps=Math.round((bB-bT)/Math.max(8,W*0.09));var s='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#d8a010" stroke-width="'+Math.max(2,W*0.030)+'" stroke-linecap="round" opacity="0.95"/><line x1="'+(x1-off)+'" y1="'+y1+'" x2="'+(x2-off)+'" y2="'+y2+'" stroke="#d8a010" stroke-width="'+Math.max(1.5,W*0.022)+'" stroke-linecap="round" opacity="0.95"/>';for(var i=0;i<=steps;i++){var t=i/steps,sx=x1+(x2-x1)*t,sy=y1+(y2-y1)*t;s+='<line x1="'+sx+'" y1="'+sy+'" x2="'+(sx-off)+'" y2="'+sy+'" stroke="#d8a010" stroke-width="'+Math.max(1,W*0.016)+'"/>';}return s;}
+function platform(rx,rr,y){return '<rect x="'+(rx-2)+'" y="'+(y-3)+'" width="'+(rr-rx+4)+'" height="4" fill="#d8a010" opacity="0.88"/>';}
+function pctBadge(cx,y,pct,fsz,col){var bw=fsz*3,bh=fsz+5;return '<rect x="'+(cx-bw/2)+'" y="'+y+'" width="'+bw+'" height="'+bh+'" rx="'+(bh/2)+'" fill="rgba(8,16,28,0.72)"/><text x="'+cx+'" y="'+(y+bh-3)+'" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="'+fsz+'" font-weight="700" fill="'+col+'">'+pct+'%</text>';}
+function stateBadge(cx,y,r,s){return '<circle cx="'+cx+'" cy="'+y+'" r="'+r+'" fill="'+s.c+'" opacity="0.9"/><text x="'+cx+'" y="'+(y+r*0.42)+'" text-anchor="middle" font-family="sans-serif" font-size="'+(r*1.3)+'" fill="#fff" font-weight="700">'+s.i+'</text>';}
 
 /* ══ SILO EN BASE ════════════════════════════════════ */
 function siloSVG(id,pct,est,W,H){
-  var cx=W/2,rx=Math.round(W*.06),rr=W-rx,bw=rr-rx;
-  var cT=Math.round(H*.03),bT=Math.round(H*.30),bB=Math.round(H*.82),bH=bB-bT;
-  var fY=bB-Math.round(bH*pct/100),sc=SC[String(est)],fsz=Math.max(7,Math.round(W*.12));
-  var gp=pct>0?grainPoly(rx,rr,cx,bT,bB,fY,est):null;
-  var dW=Math.round(bw*.14),dH=Math.round(bH*.09);
+  var cx=W/2,rx=Math.round(W*0.06),rr=W-rx,bw=rr-rx;
+  var cT=Math.round(H*0.03),bT=Math.round(H*0.30),bB=Math.round(H*0.82),bH=bB-bT;
+  var fillH=Math.round(bH*pct/100),flatY=bB-fillH;
+  var sc=SC[String(est)],fsz=Math.max(7,Math.round(W*0.12));
+  var gp=pct>0?grainPoly(rx,rr,cx,bT,bB,flatY,est):null;
+  var dW=Math.round(bw*0.14),dH2=Math.round(bH*0.09);
   var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">'+mkDefs(id);
   s+='<clipPath id="cb'+id+'"><rect x="'+rx+'" y="'+bT+'" width="'+bw+'" height="'+bH+'"/></clipPath>';
-  s+='<ellipse cx="'+cx+'" cy="'+bB+'" rx="'+(bw/2+4)+'" ry="'+Math.round(H*.016)+'" fill="#3a5060" opacity="0.55"/>';
+  s+='<ellipse cx="'+cx+'" cy="'+bB+'" rx="'+(bw/2+4)+'" ry="'+Math.round(H*0.016)+'" fill="#3a5060" opacity="0.55"/>';
   s+='<rect x="'+(rx-3)+'" y="'+(bB-3)+'" width="'+(bw+6)+'" height="7" rx="3" fill="#3a5870"/>';
   s+='<rect x="'+rx+'" y="'+bT+'" width="'+bw+'" height="'+bH+'" fill="url(#m'+id+')"/>';
   if(gp)s+='<polygon points="'+gp+'" fill="url(#g'+id+')" clip-path="url(#cb'+id+')"/>';
-  s+=corrug(rx,rr,bT,bB,fY)+seams(rx,bw,bT,bB,8);
+  s+=corrug(rx,rr,bT,bB,flatY,H)+vertSeams(rx,bw,bT,bB,8);
   s+='<rect x="'+rx+'" y="'+bT+'" width="'+bw+'" height="'+bH+'" fill="none" stroke="#2a4a60" stroke-width="0.7"/>';
-  s+=stair(rx,rr,bT,bB,W);
-  s+='<rect x="'+(rx-1)+'" y="'+(bT-4)+'" width="'+(bw+2)+'" height="5" fill="#d8a010"/>';
-  var lx1=rx-9,lx2=rx-4,lst=Math.round((bB-bT)/8);
-  s+='<line x1="'+lx1+'" y1="'+bT+'" x2="'+lx1+'" y2="'+bB+'" stroke="#d8a010" stroke-width="1.3"/><line x1="'+lx2+'" y1="'+bT+'" x2="'+lx2+'" y2="'+bB+'" stroke="#d8a010" stroke-width="1.3"/>';
-  for(var y=bT+lst;y<bB;y+=lst)s+='<line x1="'+lx1+'" y1="'+y+'" x2="'+lx2+'" y2="'+y+'" stroke="#d8a010" stroke-width="1"/>';
-  s+='<rect x="'+(cx-dW/2)+'" y="'+(bB-dH-4)+'" width="'+dW+'" height="'+dH+'" rx="1" fill="#1a3040" stroke="#3a6070" stroke-width="0.5"/>';
+  s+=diagStair(rx,rr,bT,bB,W)+platform(rx,rr,bT);
+  var lx1=rx-9,lx2=rx-4;s+='<line x1="'+lx1+'" y1="'+bT+'" x2="'+lx1+'" y2="'+bB+'" stroke="#d8a010" stroke-width="1.3"/><line x1="'+lx2+'" y1="'+bT+'" x2="'+lx2+'" y2="'+bB+'" stroke="#d8a010" stroke-width="1.3"/>';
+  var lrst=Math.round((bB-bT)/8);for(var y=bT+lrst;y<bB;y+=lrst)s+='<line x1="'+lx1+'" y1="'+y+'" x2="'+lx2+'" y2="'+y+'" stroke="#d8a010" stroke-width="1"/>';
+  s+='<rect x="'+(cx-dW/2)+'" y="'+(bB-dH2-4)+'" width="'+dW+'" height="'+dH2+'" rx="1" fill="#1a3040" stroke="#3a6070" stroke-width="0.5"/>';
   s+='<polygon points="'+cx+','+cT+' '+rx+','+bT+' '+rr+','+bT+'" fill="url(#cr'+id+')" stroke="#1e3248" stroke-width="0.8"/>';
   for(var p=0;p<=10;p++)s+='<line x1="'+cx+'" y1="'+cT+'" x2="'+(rx+bw*p/10)+'" y2="'+bT+'" stroke="#1a3048" stroke-width="0.5" opacity="0.4"/>';
   for(var cr=1;cr<=4;cr++){var tt=cr/5,cy2=cT+(bT-cT)*tt,cx2=cx-(bw/2)*tt,cx3=cx+(bw/2)*tt;s+='<line x1="'+cx2+'" y1="'+cy2+'" x2="'+cx3+'" y2="'+cy2+'" stroke="#2a4a60" stroke-width="0.6" opacity="0.5"/>';}
   s+='<rect x="'+(cx-4)+'" y="0" width="8" height="'+cT+'" rx="2" fill="#2a4258"/><ellipse cx="'+cx+'" cy="'+cT+'" rx="8" ry="4" fill="#1e3248"/>';
-  s+=pctB(cx,bT+6,pct,fsz,pc(pct))+stB(cx,bB+Math.round(H*.055),Math.round(W*.09),sc);
+  s+=pctBadge(cx,bT+6,pct,fsz,pc(pct))+stateBadge(cx,bB+Math.round(H*0.055),Math.round(W*0.09),sc);
   return s+'</svg>';
 }
 
-/* ══ PULMÓN ═══════════════════════════════════════════ */
+/* ══ PULMÓN ══════════════════════════════════════════ */
 function pulmonSVG(id,pct,est,W,H){
-  var cx=W/2,rx=Math.round(W*.06),rr=W-rx,bw=rr-rx;
-  var cT=Math.round(H*.03),bT=Math.round(H*.28),bB=Math.round(H*.60),bH=bB-bT;
-  var hT=bB,hB=Math.round(H*.76),hLx=Math.round(W*.30),hRx=W-hLx,legB=Math.round(H*.96);
-  var fY=bB-Math.round(bH*pct/100),sc=SC[String(est)],fsz=Math.max(6,Math.round(W*.11));
-  var gp=pct>0?grainPoly(rx,rr,cx,bT,bB,fY,est):null;
+  var cx=W/2,rx=Math.round(W*0.06),rr=W-rx,bw=rr-rx;
+  var cT=Math.round(H*0.03),bT=Math.round(H*0.28),bB=Math.round(H*0.60),bH=bB-bT;
+  var hT=bB,hB=Math.round(H*0.76),hLx=Math.round(W*0.30),hRx=W-hLx,legB=Math.round(H*0.96);
+  var fillH=Math.round(bH*pct/100),flatY=bB-fillH;
+  var sc=SC[String(est)],fsz=Math.max(6,Math.round(W*0.11));
+  var gp=pct>0?grainPoly(rx,rr,cx,bT,bB,flatY,est):null;
   var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">'+mkDefs(id);
   s+='<clipPath id="cb'+id+'"><rect x="'+rx+'" y="'+bT+'" width="'+bw+'" height="'+bH+'"/></clipPath>';
   s+='<clipPath id="ch'+id+'"><polygon points="'+rx+','+hT+' '+rr+','+hT+' '+hRx+','+hB+' '+hLx+','+hB+'"/></clipPath>';
   s+='<line x1="'+hLx+'" y1="'+hB+'" x2="'+(hLx-5)+'" y2="'+legB+'" stroke="#3a6858" stroke-width="2.5"/><line x1="'+hRx+'" y1="'+hB+'" x2="'+(hRx+5)+'" y2="'+legB+'" stroke="#3a6858" stroke-width="2.5"/>';
-  s+='<line x1="'+(hLx-5)+'" y1="'+Math.round(H*.88)+'" x2="'+(hRx+5)+'" y2="'+Math.round(H*.88)+'" stroke="#3a6858" stroke-width="1.8"/>';
+  s+='<line x1="'+(hLx-5)+'" y1="'+Math.round(H*0.88)+'" x2="'+(hRx+5)+'" y2="'+Math.round(H*0.88)+'" stroke="#3a6858" stroke-width="1.8"/>';
   s+='<line x1="'+hLx+'" y1="'+hB+'" x2="'+(hRx+5)+'" y2="'+legB+'" stroke="#2a5048" stroke-width="1" opacity="0.6"/><line x1="'+hRx+'" y1="'+hB+'" x2="'+(hLx-5)+'" y2="'+legB+'" stroke="#2a5048" stroke-width="1" opacity="0.6"/>';
   s+='<polygon points="'+rx+','+hT+' '+rr+','+hT+' '+hRx+','+hB+' '+hLx+','+hB+'" fill="url(#m'+id+')" stroke="#2a4a60" stroke-width="0.7"/>';
   if(pct>0)s+='<polygon points="'+rx+','+hT+' '+rr+','+hT+' '+hRx+','+(hB-2)+' '+hLx+','+(hB-2)+'" fill="url(#hg'+id+')" opacity="0.9" clip-path="url(#ch'+id+')"/>';
-  s+='<rect x="'+(hLx+2)+'" y="'+hB+'" width="'+(hRx-hLx-4)+'" height="'+Math.round(H*.024)+'" rx="2" fill="#2a4a60"/>';
+  s+='<rect x="'+(hLx+2)+'" y="'+hB+'" width="'+(hRx-hLx-4)+'" height="'+Math.round(H*0.024)+'" rx="2" fill="#2a4a60"/>';
   s+='<rect x="'+rx+'" y="'+bT+'" width="'+bw+'" height="'+bH+'" fill="url(#m'+id+')"/>';
   if(gp)s+='<polygon points="'+gp+'" fill="url(#g'+id+')" clip-path="url(#cb'+id+')"/>';
-  s+=corrug(rx,rr,bT,bB,fY)+seams(rx,bw,bT,bB,8);
+  s+=corrug(rx,rr,bT,bB,flatY,H)+vertSeams(rx,bw,bT,bB,8);
   s+='<rect x="'+rx+'" y="'+bT+'" width="'+bw+'" height="'+bH+'" fill="none" stroke="#2a4a60" stroke-width="0.7"/>';
-  s+=stair(rx,rr,bT,bB,W);
-  s+='<rect x="'+(rx-1)+'" y="'+(bT-4)+'" width="'+(bw+2)+'" height="5" fill="#d8a010"/>';
-  var lx1=rx-9,lx2=rx-4,lst2=Math.round((bB-bT)/8);
-  s+='<line x1="'+lx1+'" y1="'+bT+'" x2="'+lx1+'" y2="'+bB+'" stroke="#d8a010" stroke-width="1.3"/><line x1="'+lx2+'" y1="'+bT+'" x2="'+lx2+'" y2="'+bB+'" stroke="#d8a010" stroke-width="1.3"/>';
-  for(var yy=bT+lst2;yy<bB;yy+=lst2)s+='<line x1="'+lx1+'" y1="'+yy+'" x2="'+lx2+'" y2="'+yy+'" stroke="#d8a010" stroke-width="1"/>';
+  s+=diagStair(rx,rr,bT,bB,W)+platform(rx,rr,bT);
+  var lx1=rx-9,lx2=rx-4;s+='<line x1="'+lx1+'" y1="'+bT+'" x2="'+lx1+'" y2="'+bB+'" stroke="#d8a010" stroke-width="1.3"/><line x1="'+lx2+'" y1="'+bT+'" x2="'+lx2+'" y2="'+bB+'" stroke="#d8a010" stroke-width="1.3"/>';
+  var lst2=Math.round((bB-bT)/8);for(var yy=bT+lst2;yy<bB;yy+=lst2)s+='<line x1="'+lx1+'" y1="'+yy+'" x2="'+lx2+'" y2="'+yy+'" stroke="#d8a010" stroke-width="1"/>';
   s+='<polygon points="'+cx+','+cT+' '+rx+','+bT+' '+rr+','+bT+'" fill="url(#cr'+id+')" stroke="#1e3248" stroke-width="0.8"/>';
   for(var pp=0;pp<=10;pp++)s+='<line x1="'+cx+'" y1="'+cT+'" x2="'+(rx+bw*pp/10)+'" y2="'+bT+'" stroke="#1a3048" stroke-width="0.5" opacity="0.4"/>';
   for(var cr2=1;cr2<=4;cr2++){var t2=cr2/5,cy3=cT+(bT-cT)*t2,cx4=cx-(bw/2)*t2,cx5=cx+(bw/2)*t2;s+='<line x1="'+cx4+'" y1="'+cy3+'" x2="'+cx5+'" y2="'+cy3+'" stroke="#2a4a60" stroke-width="0.6" opacity="0.5"/>';}
   s+='<rect x="'+(cx-4)+'" y="0" width="8" height="'+cT+'" rx="2" fill="#2a4258"/><ellipse cx="'+cx+'" cy="'+cT+'" rx="8" ry="4" fill="#1e3248"/>';
-  s+=pctB(cx,bT+6,pct,fsz,pc(pct))+stB(cx,hB+Math.round(H*.06),Math.round(W*.09),sc);
+  s+=pctBadge(cx,bT+6,pct,fsz,pc(pct))+stateBadge(cx,hB+Math.round(H*0.06),Math.round(W*0.09),sc);
   return s+'</svg>';
 }
 
-/* ══ BODEGA ═══════════════════════════════════════════ */
+/* ══ BODEGA ══════════════════════════════════════════ */
 function bodegaSVG(id,pct,est,W,H){
-  var cx=W/2,wL=Math.round(W*.04),wR=W-wL,ww=wR-wL;
-  var rY=Math.round(H*.06),wT=Math.round(H*.42),wB=Math.round(H*.86),wH=wB-wT;
-  var fH=Math.round(wH*pct/100),fY=wB-fH,sc=SC[String(est)],fsz=Math.max(7,Math.round(W*.09));
+  var cx=W/2,wL=Math.round(W*0.04),wR=W-wL,ww=wR-wL;
+  var rY=Math.round(H*0.06),wT=Math.round(H*0.42),wB=Math.round(H*0.86),wH=wB-wT;
+  var fH=Math.round(wH*pct/100),fY=wB-fH;
+  var sc=SC[String(est)],fsz=Math.max(7,Math.round(W*0.09));
   var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">'+mkDefs(id);
   s+='<clipPath id="cb'+id+'"><rect x="'+wL+'" y="'+wT+'" width="'+ww+'" height="'+wH+'"/></clipPath>';
-  s+='<rect x="'+(wL-4)+'" y="'+wB+'" width="'+(ww+8)+'" height="'+Math.round(H*.04)+'" rx="2" fill="#8aa0b0"/>';
+  s+='<rect x="'+(wL-4)+'" y="'+wB+'" width="'+(ww+8)+'" height="'+Math.round(H*0.04)+'" rx="2" fill="#8aa0b0"/>';
   s+='<rect x="'+wL+'" y="'+wT+'" width="'+ww+'" height="'+wH+'" fill="url(#bw'+id+')" stroke="#4a7080" stroke-width="0.6"/>';
   if(pct>0)s+='<rect x="'+(wL+1)+'" y="'+fY+'" width="'+(ww-2)+'" height="'+fH+'" fill="url(#g'+id+')" clip-path="url(#cb'+id+')" opacity="0.82"/>';
-  var cst=Math.max(5,Math.round(wH/12));for(var yb=wT+cst;yb<wB;yb+=cst)s+='<line x1="'+wL+'" y1="'+yb+'" x2="'+wR+'" y2="'+yb+'" stroke="'+(yb<fY?'#406080':'#7898b0')+'" stroke-width="0.55" opacity="0.45"/>';
+  var cst=Math.max(5,Math.round(wH/12));for(var y=wT+cst;y<wB;y+=cst)s+='<line x1="'+wL+'" y1="'+y+'" x2="'+wR+'" y2="'+y+'" stroke="'+(y<fY?'#406080':'#7898b0')+'" stroke-width="0.55" opacity="0.45"/>';
   [wL,Math.round(wL+ww*.2),Math.round(wL+ww*.4),Math.round(wL+ww*.6),Math.round(wL+ww*.8),wR].forEach(function(x){s+='<rect x="'+(x-1.5)+'" y="'+wT+'" width="3" height="'+wH+'" fill="#3a6070" opacity="0.45"/>';});
   s+='<rect x="'+wL+'" y="'+wT+'" width="'+ww+'" height="'+wH+'" fill="none" stroke="#3a6080" stroke-width="0.8"/>';
   s+='<polygon points="'+(wL-2)+','+wT+' '+cx+','+rY+' '+cx+','+wT+'" fill="url(#cr'+id+')" stroke="#1e3248" stroke-width="0.8"/>';
   s+='<polygon points="'+cx+','+wT+' '+cx+','+rY+' '+(wR+2)+','+wT+'" fill="url(#cr'+id+')" stroke="#1e3248" stroke-width="0.8"/>';
-  var dW=Math.round(ww*.2),dH2=Math.round(wH*.45);
-  [Math.round(wL+ww*.1),Math.round(wL+ww*.65)].forEach(function(dx){s+='<rect x="'+dx+'" y="'+(wB-dH2)+'" width="'+dW+'" height="'+dH2+'" rx="1" fill="#1a2e3e" stroke="#2a5060" stroke-width="0.6"/>';for(var dp=1;dp<4;dp++)s+='<line x1="'+dx+'" y1="'+(wB-dH2+Math.round(dH2*dp/4))+'" x2="'+(dx+dW)+'" y2="'+(wB-dH2+Math.round(dH2*dp/4))+'" stroke="#243a4a" stroke-width="0.5"/>';});
-  s+=pctB(cx,wT+8,pct,fsz,pc(pct));
-  s+='<text x="'+cx+'" y="'+(wB+Math.round(H*.08))+'" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="'+(fsz+1)+'" fill="'+sc.c+'" font-weight="700">'+sc.i+' '+sc.l+'</text>';
+  var dW=Math.round(ww*0.2),dH3=Math.round(wH*0.45);
+  [Math.round(wL+ww*.1),Math.round(wL+ww*.65)].forEach(function(dx){s+='<rect x="'+dx+'" y="'+(wB-dH3)+'" width="'+dW+'" height="'+dH3+'" rx="1" fill="#1a2e3e" stroke="#2a5060" stroke-width="0.6"/>';for(var dp=1;dp<4;dp++)s+='<line x1="'+dx+'" y1="'+(wB-dH3+Math.round(dH3*dp/4))+'" x2="'+(dx+dW)+'" y2="'+(wB-dH3+Math.round(dH3*dp/4))+'" stroke="#243a4a" stroke-width="0.5"/>';});
+  s+=pctBadge(cx,wT+8,pct,fsz,pc(pct));
+  s+='<text x="'+cx+'" y="'+(wB+Math.round(H*0.08))+'" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="'+(fsz+1)+'" fill="'+sc.c+'" font-weight="700">'+sc.i+' '+sc.l+'</text>';
   return s+'</svg>';
 }
 
 /* ══ TOLVA ════════════════════════════════════════════ */
 function tolvaSVG(id,pct,est,W,H){
   var cx=W/2,sc=SC[String(est)],fsz=Math.max(6,Math.round(W*.11));
-  var rx=Math.round(W*.07),rr=W-rx,tT=Math.round(H*.08),tB=Math.round(H*.76);
-  var ox=Math.round(W*.36),orr=W-ox,tH=tB-tT;
+  var rx=Math.round(W*.07),rr=W-rx,tT=Math.round(H*.08),tB=Math.round(H*.76),tH=tB-tT;
+  var ox=Math.round(W*.36),orr=W-ox;
   var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">'+mkDefs(id);
   s+='<clipPath id="cb'+id+'"><polygon points="'+rx+','+tT+' '+rr+','+tT+' '+orr+','+tB+' '+ox+','+tB+'"/></clipPath>';
   s+='<line x1="'+ox+'" y1="'+tB+'" x2="'+(ox-3)+'" y2="'+Math.round(H*.93)+'" stroke="#3a6058" stroke-width="2"/><line x1="'+orr+'" y1="'+tB+'" x2="'+(orr+3)+'" y2="'+Math.round(H*.93)+'" stroke="#3a6058" stroke-width="2"/><line x1="'+(ox-3)+'" y1="'+Math.round(H*.85)+'" x2="'+(orr+3)+'" y2="'+Math.round(H*.85)+'" stroke="#3a6058" stroke-width="1.5"/>';
   s+='<polygon points="'+rx+','+tT+' '+rr+','+tT+' '+orr+','+tB+' '+ox+','+tB+'" fill="url(#m'+id+')" stroke="#2a4a60" stroke-width="0.7"/>';
   if(pct>0)s+='<polygon points="'+rx+','+tT+' '+rr+','+tT+' '+orr+','+tB+' '+ox+','+tB+'" fill="url(#g'+id+')" clip-path="url(#cb'+id+')" opacity="0.88"/>';
   s+='<rect x="'+(ox+2)+'" y="'+tB+'" width="'+(orr-ox-4)+'" height="'+Math.round(H*.05)+'" rx="2" fill="#2a4a60"/>';
-  s+=pctB(cx,tT+5,pct,fsz,pc(pct));
+  s+=pctBadge(cx,tT+5,pct,fsz,pc(pct));
   s+='<text x="'+cx+'" y="'+(tB+Math.round(H*.12))+'" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="'+fsz+'" fill="'+sc.c+'" font-weight="700">'+sc.i+'</text>';
   return s+'</svg>';
 }
@@ -631,13 +536,13 @@ function mkSVG(nom,tipo,cap,kg,W,H){
 }
 
 function sz(cap,maxCap,tipo){
-  var r=Math.pow(Math.max(0.08,cap/maxCap),.43);
+  var r=Math.pow(Math.max(0.08,cap/maxCap),0.43);
   if(tipo==='BODEGA')return{w:Math.round(90+(180-90)*r),h:Math.round(100+(180-100)*r)};
   if(tipo==='TOLVA') return{w:Math.round(45+(80-45)*r),h:Math.round(100+(160-100)*r)};
   return{w:Math.round(72+(160-72)*r),h:Math.round(130+(250-130)*r)};
 }
 
-/* ══ RENDER ═══════════════════════════════════════════ */
+/* ══ RENDER ══════════════════════════════════════════ */
 function render(){
   var grupos={};
   EST.forEach(function(d){if(!grupos[d.u])grupos[d.u]=[];grupos[d.u].push(d);});
@@ -647,12 +552,11 @@ function render(){
   EST.forEach(function(d){gC+=d.c;gK+=(INV[d.cod]||{kg:0}).kg;});
   var gP=gC>0?Math.round(gK/gC*100):0,gPc=pc(gP);
 
-  document.getElementById('hkpis').innerHTML=
-    hk(ft(gC),'Capacidad')+hk(ft(gK),'Stock')+hk(gP+'%','Ocupación');
+  document.getElementById('hkpis').innerHTML=hk(ft(gC),'Capacidad')+hk(ft(gK),'Stock')+hk(gP+'%','Ocupación');
   document.getElementById('kbar').innerHTML=
     mkK('nv','Capacidad Sistema',ft(gC),fn(gC/1000)+' TON',100,'#0c2840')+
     mkK('gd','Stock en Almacén',ft(gK),fn(gK)+' KG',gP,gPc)+
-    mkK('gn','Espacio Disponible',ft(gC-gK),'Para almacenar',100-gP,'#167848')+
+    mkK('gn','Espacio Disponible',ft(gC-gK),'Disponible para almacenar',100-gP,'#167848')+
     mkK('st','Ubicaciones',Object.keys(grupos).length+' Plantas',EST.length+' estructuras',100,'#2a6888');
 
   var uL=Object.keys(grupos).sort();
@@ -662,7 +566,6 @@ function render(){
 
   var main=document.getElementById('main');
   main.innerHTML='';
-
   uL.forEach(function(ubi,ui){
     var silos=grupos[ubi],maxC=silos[0].c,lC=0,lK=0;
     silos.forEach(function(d){lC+=d.c;lK+=(INV[d.cod]||{kg:0}).kg;});
@@ -678,13 +581,12 @@ function render(){
       +'<div class="lstat"><div class="lsl">% Ocupación</div><div class="lsv" style="color:'+lPc+'">'+lP+'%</div></div>'
       +'<div class="lstat"><div class="lsl">Con stock</div><div class="lsv">'+lAct+' / '+silos.length+'</div></div>'
       +'</div>'
-      +'<div class="legend"><strong>Clic para cambiar estado (se guarda en Firebase):</strong>'
+      +'<div class="legend"><strong>Clic para cambiar estado del grano:</strong>'
       +'<span class="li"><span class="ld" style="background:#167848"></span>▲ Llenando</span>'
       +'<span class="li"><span class="ld" style="background:#2a6888"></span>➖ Estable</span>'
       +'<span class="li"><span class="ld" style="background:#982828"></span>▼ Vaciando</span>'
       +'<span class="li"><span class="ld" style="background:#c07818"></span>╱ Inclinado</span>'
       +'<span class="li"><span class="ld" style="background:#8b44ac"></span>∧∧ Doble pico</span>'
-      +'<span class="li-fb">🔥 Estado sincronizado en tiempo real</span>'
       +'</div>'
       +'<div class="sgrid" id="sg'+ui+'"></div>';
     main.appendChild(panel);
@@ -719,15 +621,11 @@ function render(){
         e.stopPropagation();
         var nom=this.dataset.nom;
         var cur=GS[nom]!==undefined?GS[nom]:1;
+        /* ciclo: 1 → 0 → -1 → 2 → -2 → 1 */
         var idx=STATE_ORDER.indexOf(cur);
         var next=STATE_ORDER[(idx+1)%STATE_ORDER.length];
         GS[nom]=next;
-        /* ── GUARDAR EN FIREBASE ── */
-        saveStateToFirebase(nom, next);
-        /* Feedback visual inmediato */
-        this.classList.add('saving');
-        var self=this;
-        setTimeout(function(){self.classList.remove('saving');},2000);
+        saveEstado(nom, next);   /* ← guarda en Firebase */
         render();
       });
       grid.appendChild(card);
@@ -740,9 +638,10 @@ function render(){
 }
 
 function hk(v,l){return '<div class="hkpi"><div class="hkpi-v">'+v+'</div><div class="hkpi-l">'+l+'</div></div>';}
-function mkK(cl,lbl,val,sub,p,pcol){return '<div class="kpi-card '+cl+'"><div class="klbl">'+lbl+'</div><div class="kval">'+val+'</div><div class="ksub">'+sub+'</div><div class="kmbar"><div class="kmfill" style="width:'+Math.min(100,p)+'%;background:'+pcol+'"></div></div></div>';}
+function mkK(cl,lbl,val,sub,p,pcol){
+  return '<div class="kpi-card '+cl+'"><div class="klbl">'+lbl+'</div><div class="kval">'+val+'</div><div class="ksub">'+sub+'</div><div class="kmbar"><div class="kmfill" style="width:'+Math.min(100,p)+'%;background:'+pcol+'"></div></div></div>';
+}
 
-/* ══ ARRANQUE ════════════════════════════════════════ */
 setInterval(function(){
   var n=new Date();
   document.getElementById('clk').innerHTML=
@@ -750,12 +649,9 @@ setInterval(function(){
     n.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 },1000);
 
-/* 1. Conectar Firebase (escucha estados en tiempo real) */
-initFirebase();
-/* 2. Cargar CSV (inventario + estructura) */
+initFirebase();      /* conectar Firebase y escuchar estados */
+setInterval(load,300000);
 load();
-/* 3. Auto-refresh del CSV cada 5 minutos */
-setInterval(load, 300000);
 </script>
 </body>
 </html>
