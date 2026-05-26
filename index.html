@@ -243,33 +243,67 @@ function buildEST(parsed){
    Col G (idx 6) = Libre utilización (KG)
 ══════════════════════════════════════════════════════ */
 function buildINV(parsed){
-  var inv={};
-  var h=parsed.hdr;
+  var inv = {};
+  /* ══════════════════════════════════════════════════
+     Estructura FIJA del CSV BD-MB52-SILOS (gid=0):
+     Col A (idx 0) = FECHA
+     Col B (idx 1) = Material (código numérico — NO usar como nombre)
+     Col C (idx 2) = Texto breve de material (NOMBRE del producto)
+     Col D (idx 3) = (otros datos)
+     Col E (idx 4) = Almacén (código: 0012, 0023, etc.)
+     Col F (idx 5) = (otros datos)
+     Col G (idx 6) = Libre utilización (KG inventario)
+  ══════════════════════════════════════════════════ */
+  var h = parsed.hdr;
+
   parsed.rows.forEach(function(r){
-    /* Código almacén — busca por nombre, fallback col A (0) y col E (4) */
-    var codRaw = getCol(r,h,['Almacén','Almacen','ALMACEN'],0) ||
-                 getCol(r,h,['ALMACEN','ALM'],4);
-    var cod = normCode(codRaw);   /* "0012" → 12 para TODOS los almacenes */
-    if(!cod)return;
+    var row = r._r || [];
 
-    var mat = String(getCol(r,h,['Texto breve de material','Texto breve','Material'],2)||'').trim();
-    /* Libre utilización está FIJO en Columna G (índice 6) del CSV */
-    var kgRaw = (r._r && r._r[6] !== undefined && r._r[6] !== '')
-                ? r._r[6]
-                : getCol(r,h,['Libre utilización','Libre utilizacion','LIBRE UTIL','LIBRE'],6);
-    var kg = pn(kgRaw || '0');
+    /* ── ALMACÉN: Col E (idx 4) — "0012" → normCode → 12 ── */
+    var codRaw = row[4] !== undefined && row[4] !== ''
+                 ? row[4]
+                 : (r['Almacén'] || r['Almacen'] || '');
+    var cod = normCode(codRaw);
+    if(!cod) return;
 
-    if(!inv[cod])inv[cod]={kg:0,m:'',_mx:0};
-    inv[cod].kg+=kg;   /* sumar TODAS las filas del mismo almacén */
-    if(mat&&Math.abs(kg)>inv[cod]._mx){inv[cod].m=mat;inv[cod]._mx=Math.abs(kg);}
+    /* ── NOMBRE PRODUCTO: Col C (idx 2) = "Texto breve de material" ── */
+    var mat = String(
+      row[2] !== undefined && row[2] !== ''
+        ? row[2]
+        : (r['Texto breve de material'] || r['Texto breve'] || '')
+    ).trim();
+
+    /* ── KG INVENTARIO: Col G (idx 6) = "Libre utilización" ── */
+    var kgRaw = row[6] !== undefined && row[6] !== ''
+                ? row[6]
+                : (r['Libre utilización'] || r['Libre utilizacion'] || '0');
+    var kg = pn(kgRaw);
+
+    /* ── ACUMULAR por almacén (varios lotes/materiales → suma) ── */
+    if(!inv[cod]) inv[cod] = {kg:0, m:'', _mx:0};
+    inv[cod].kg += kg;
+
+    /* Guardar el nombre del material con mayor KG absoluto */
+    if(mat && Math.abs(kg) > inv[cod]._mx){
+      inv[cod].m  = mat;
+      inv[cod]._mx = Math.abs(kg);
+    }
   });
 
-  console.log('[INV] Almacenes con stock:',Object.keys(inv).filter(function(k){return inv[k].kg>0;}).length,
-    '/ Total:',Object.keys(inv).length);
-  console.log('[INV] Todos los códigos cargados:',
-    Object.keys(inv).sort(function(a,b){return a-b;}).join(', '));
+  /* ── Diagnóstico en consola ── */
+  var keys = Object.keys(inv).sort(function(a,b){return a-b;});
+  console.log('[INV] Cargados:', keys.length, 'almacenes');
+  console.log('[INV] Códigos:', keys.join(', '));
+  console.log('[INV] Ejemplo cod 12 (Silo 1):', inv[12]
+    ? (inv[12].kg/1000).toFixed(2)+'k KG → '+inv[12].m
+    : 'NO ENCONTRADO — verifica que col E=0012');
+  console.log('[INV] Ejemplo cod 23 (Silo 12):', inv[23]
+    ? (inv[23].kg/1000).toFixed(2)+'k KG → '+inv[23].m
+    : 'NO ENCONTRADO');
+
   return inv;
 }
+
 
 /* ══════════════════════════════════════════════════════
    SINCRONIZACIÓN
