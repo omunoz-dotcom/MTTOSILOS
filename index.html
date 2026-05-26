@@ -105,90 +105,53 @@ header{
 </style>
 </head>
 <body>
+
 <header>
-  <div class="hbrand"><div class="hicon">🌾</div><div><div class="htitle">ALMACENERA S.A.</div><div class="hsub">Control de Inventario · Silos & Bodegas</div></div></div>
+  <div class="hbrand"><div class="hicon">🌾</div><div>
+    <div class="htitle">ALMACENERA S.A.</div>
+    <div class="hsub">Control de Inventario · Silos & Bodegas</div>
+  </div></div>
   <div class="hkpis" id="hkpis"></div>
   <div class="hright">
     <div class="spill"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Cargando…</span></div>
     <div id="clk"></div>
   </div>
 </header>
+
 <div class="kpi-bar" id="kbar"></div>
 <nav class="tabs-nav" id="tnav"></nav>
-<main id="main"><div id="loading"><div class="spinner"></div><div class="ltxt">Cargando datos…</div></div></main>
+<main id="main">
+  <div id="loading"><div class="spinner"></div><div class="ltxt">Cargando datos…</div></div>
+</main>
 
 <script>
-/* ── DATA ── */
-var CSV='https://docs.google.com/spreadsheets/d/e/2PACX-1vQsHD68GsN5kH9NtuQF5g_Q_lTQmJEv6YDnLfnd6zurixDZrkw-7loPPxlBEC3khaX3vnlM4eFNuXBy/pub?gid=0&single=true&output=csv';
+/* ══════════════════════════════════════════════════════
+   URLs — ambos CSVs del mismo spreadsheet
+   URL_INV  → inventario (Libre utilización por almacén)
+   URL_EST  → estructura de silos (SILOS ESTRUCTURA)
+   Cambia los gid según tus hojas publicadas en Google Sheets
+══════════════════════════════════════════════════════ */
+var URL_INV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQsHD68GsN5kH9NtuQF5g_Q_lTQmJEv6YDnLfnd6zurixDZrkw-7loPPxlBEC3khaX3vnlM4eFNuXBy/pub?gid=0&single=true&output=csv';
+var URL_EST = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQsHD68GsN5kH9NtuQF5g_Q_lTQmJEv6YDnLfnd6zurixDZrkw-7loPPxlBEC3khaX3vnlM4eFNuXBy/pub?gid=349286573&single=true&output=csv';
 
-var EST=[
-  {cod:12, u:"BALANFARINA",n:"SILO 1",        c:3200000,t:"SILO"},
-  {cod:13, u:"BALANFARINA",n:"SILO 2",        c:3200000,t:"SILO"},
-  {cod:22, u:"BALANFARINA",n:"SILO 11",       c:2400000,t:"SILO"},
-  {cod:23, u:"BALANFARINA",n:"SILO 12",       c:2400000,t:"SILO"},
-  {cod:25, u:"BALANFARINA",n:"SILO 14",       c:2400000,t:"SILO"},
-  {cod:24, u:"BALANFARINA",n:"SILO 13",       c:2200000,t:"SILO"},
-  {cod:35, u:"BALANFARINA",n:"BODEGA PLANA",  c:2000000,t:"BODEGA"},
-  {cod:107,u:"BALANFARINA",n:"FERTIORGANICOS",c:5000000,t:"BODEGA"},
-  {cod:14, u:"BALANFARINA",n:"SILO 3",        c:400000, t:"SILO"},
-  {cod:15, u:"BALANFARINA",n:"SILO 4",        c:400000, t:"SILO"},
-  {cod:16, u:"BALANFARINA",n:"SILO 5",        c:400000, t:"SILO"},
-  {cod:17, u:"BALANFARINA",n:"SILO 6",        c:400000, t:"SILO"},
-  {cod:18, u:"BALANFARINA",n:"SILO 7",        c:400000, t:"SILO"},
-  {cod:19, u:"BALANFARINA",n:"SILO 8",        c:400000, t:"SILO"},
-  {cod:20, u:"BALANFARINA",n:"SILO 9",        c:360000, t:"SILO"},
-  {cod:21, u:"BALANFARINA",n:"SILO 10",       c:350000, t:"SILO"},
-  {cod:29, u:"BALANFARINA",n:"PULMON 4",      c:150000, t:"PULMON"},
-  {cod:30, u:"BALANFARINA",n:"PULMON 5",      c:150000, t:"PULMON"},
-  {cod:31, u:"BALANFARINA",n:"PULMON 6",      c:150000, t:"PULMON"},
-  {cod:32, u:"BALANFARINA",n:"PULMON 7",      c:150000, t:"PULMON"},
-  {cod:26, u:"BALANFARINA",n:"PULMON 1",      c:120000, t:"PULMON"},
-  {cod:27, u:"BALANFARINA",n:"PULMON 2",      c:120000, t:"PULMON"},
-  {cod:28, u:"BALANFARINA",n:"PULMON 3",      c:50000,  t:"PULMON"},
-  {cod:33, u:"BALANFARINA",n:"TOLVA SILO 1",  c:30000,  t:"TOLVA"},
-  {cod:34, u:"BALANFARINA",n:"TOLVA SILO 2",  c:30000,  t:"TOLVA"},
-  {cod:1004,u:"DAJAHU",    n:"DAJAHU SILO 1", c:5000000,t:"SILO"},
-  {cod:104, u:"DAJAHU",    n:"DAJAHU SILO 2", c:5000000,t:"SILO"},
-  {cod:109, u:"DAJAHU",    n:"DAJAHU PULMON 4",c:5000000,t:"PULMON"},
-  {cod:106, u:"DAJAHU",    n:"DAJAHU SILO 3", c:1000000,t:"SILO"},
-  {cod:101, u:"DAJAHU",    n:"DAJAHU PULMON 1",c:1200000,t:"PULMON"},
-  {cod:102, u:"DAJAHU",    n:"DAJAHU PULMON 2",c:1200000,t:"PULMON"},
-  {cod:103, u:"DAJAHU",    n:"DAJAHU PULMON 3",c:1200000,t:"PULMON"},
-  {cod:108, u:"DAJAHU",    n:"DAJAHU SILO 4", c:1200000,t:"SILO"},
-  {cod:111, u:"DAJAHU",    n:"DAJAHU SILO 5", c:1200000,t:"SILO"},
-  {cod:117, u:"DAJAHU",    n:"DAJAHU SILO 7", c:1200000,t:"SILO"},
-  {cod:118, u:"DAJAHU",    n:"DAJAHU SILO 8", c:1200000,t:"SILO"},
-  {cod:119, u:"DAJAHU",    n:"DAJAHU BODEGA 4",c:1200000,t:"BODEGA"},
-  {cod:120, u:"DAJAHU",    n:"DAJAHU BODEGA 5",c:1200000,t:"BODEGA"},
-  {cod:127, u:"DAJAHU",    n:"DAJAHU PULMON 5",c:1200000,t:"PULMON"},
-  {cod:128, u:"DAJAHU",    n:"DAJAHU PULMON 6",c:1200000,t:"PULMON"},
-  {cod:123, u:"ECUALBULK", n:"ECUALBULK 1",   c:1400000,t:"BODEGA"},
-  {cod:124, u:"ECUALBULK", n:"ECUALBULK 2",   c:1400000,t:"BODEGA"},
-  {cod:125, u:"STOREOCEAN",n:"STOREOCEAN 1",  c:1200000,t:"BODEGA"},
-  {cod:126, u:"STOREOCEAN",n:"STOREOCEAN 2",  c:1200000,t:"BODEGA"},
-];
-
-var FB={
-  12:{kg:2432230,m:"MAIZ AMARILLO GRANEL"},13:{kg:1184359,m:"MAIZ AMARILLO GRANEL"},
-  14:{kg:136580,m:"SOYA COMERCIAL"},16:{kg:355564,m:"SOYA COMERCIAL"},
-  17:{kg:139602,m:"MAIZ AMARILLO"},18:{kg:398640,m:"MAIZ AMARILLO"},
-  23:{kg:633125,m:"TRIGO SUAVE"},24:{kg:1637590,m:"TRIGO EN GRANO"},
-  25:{kg:78,m:"MAIZ TRITUR."},27:{kg:76997,m:"AFRECHO TRIGO"},
-  31:{kg:32615,m:"DDGS"},35:{kg:1276125,m:"PASTA DE SOYA"},
-  107:{kg:165903,m:"CFP DDGS"},120:{kg:126770,m:"DDGS"},
-  123:{kg:625,m:"DDGS"},125:{kg:2375440,m:"TRIGO EN GRANO"},
-  126:{kg:101700,m:"PASTA DE SOYA"},
-};
-
-/* ── STATE ── */
-var GS={}, INV={}, TAB=0;
+/* ── ESTADO GLOBAL ── */
+var GS={}, INV={}, EST=[], TAB=0;
 var SC={'1':{i:'▲',l:'LLENANDO',c:'#167848',cl:'fill'},
         '0':{i:'➖',l:'ESTABLE', c:'#2a6888',cl:'stable'},
        '-1':{i:'▼',l:'VACIANDO',c:'#982828',cl:'empty'}};
 
+/* ══════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════ */
+function normCode(raw){
+  /* "0012" → 12 | "12" → 12 | " 0107 " → 107 */
+  return parseInt(String(raw||'').trim().replace(/^0+/,'')) || 0;
+}
+
 function pn(s){
   if(typeof s==='number')return s;
-  s=String(s||'').trim().replace(/\s/g,'');if(!s||s==='-')return 0;
+  s=String(s||'').trim().replace(/\s/g,'');
+  if(!s||s==='-')return 0;
   if(s.indexOf(',')>-1&&s.indexOf('.')>-1)
     s=s.lastIndexOf(',')>s.lastIndexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');
   else if(s.indexOf(',')>-1)s=s.replace(',','.');
@@ -199,6 +162,157 @@ function fn(n){return n.toLocaleString('es-EC',{maximumFractionDigits:0});}
 function pc(p){return p>=85?'#982828':p>=50?'#b06010':'#167848';}
 function pb(p){return p>=85?'rgba(152,40,40,.1)':p>=50?'rgba(176,96,16,.1)':'rgba(22,120,72,.1)';}
 function pt(p){return p>=85?'#c03030':p>=50?'#c87018':'#189858';}
+
+function mapTipo(raw){
+  var r=String(raw||'').toUpperCase();
+  if(r.indexOf('CONICO')>-1||r.indexOf('PULMON')>-1||r.indexOf('PULMÓN')>-1)return 'PULMON';
+  if(r.indexOf('BODEGA')>-1)return 'BODEGA';
+  if(r.indexOf('TOLVA')>-1)return 'TOLVA';
+  return 'SILO';
+}
+
+/* ══════════════════════════════════════════════════════
+   CSV PARSER
+══════════════════════════════════════════════════════ */
+function parseCSV(txt){
+  var rows=[],cur=[],cell='',inQ=false;
+  for(var i=0;i<txt.length;i++){
+    var c=txt[i];
+    if(c==='"'){if(inQ&&txt[i+1]==='"'){cell+='"';i++;}else inQ=!inQ;}
+    else if(c===','&&!inQ){cur.push(cell.trim());cell='';}
+    else if((c==='\n'||c==='\r')&&!inQ){
+      if(cell||cur.length){cur.push(cell.trim());rows.push(cur);}
+      cell='';cur=[];if(c==='\r'&&txt[i+1]==='\n')i++;
+    }else cell+=c;
+  }
+  if(cell||cur.length){cur.push(cell.trim());rows.push(cur);}
+  if(!rows.length)return{hdr:[],rows:[]};
+  var hdr=rows[0].map(function(h){return h.replace(/"/g,'').trim();});
+  var data=rows.slice(1).filter(function(r){return r.some(function(c){return c;});}).map(function(r){
+    var o={};hdr.forEach(function(h,j){o[h]=(r[j]||'').replace(/"/g,'').trim();});o._r=r;return o;
+  });
+  return{hdr:hdr,rows:data};
+}
+
+/* Busca valor por nombre de columna (insensible a tildes/mayúsculas) */
+function getCol(row, hdr, names, fallbackIdx){
+  var norm=function(s){return String(s||'').toUpperCase()
+    .replace(/[ÁÀÂÄ]/g,'A').replace(/[ÉÈÊË]/g,'E').replace(/[ÍÌÎÏ]/g,'I')
+    .replace(/[ÓÒÔÖ]/g,'O').replace(/[ÚÙÛÜ]/g,'U').replace(/[^A-Z0-9]/g,'');};
+  for(var ni=0;ni<names.length;ni++){
+    var tgt=norm(names[ni]);
+    for(var hi=0;hi<hdr.length;hi++){
+      if(norm(hdr[hi]).indexOf(tgt)>-1||tgt.indexOf(norm(hdr[hi]))>-1){
+        var v=row[hdr[hi]];
+        if(v!==undefined&&String(v).trim()!=='')return String(v).trim();
+      }
+    }
+  }
+  return (row._r&&row._r[fallbackIdx])||'';
+}
+
+/* ══════════════════════════════════════════════════════
+   PARSEAR ESTRUCTURA DE SILOS desde CSV
+   Columnas: Almacén | UBICACION | NOMBRE ALMACEN | CAP ALM TON | TIPO SILO
+══════════════════════════════════════════════════════ */
+function buildEST(parsed){
+  var est=[];
+  var h=parsed.hdr;
+  parsed.rows.forEach(function(r){
+    var codRaw = getCol(r,h,['Almacén','Almacen','ALMACEN','COD'],0);
+    var cod    = normCode(codRaw);
+    var ubi    = String(getCol(r,h,['UBICACION','UBICACIÓN','UBICACION','UBI'],1)||'').trim().toUpperCase();
+    var nom    = String(getCol(r,h,['NOMBRE ALMACEN','NOMBRE ALM','NOMBRE'],2)||'').trim().toUpperCase();
+    var cap    = pn(getCol(r,h,['CAP ALM TON','CAPACIDAD','CAP'],3)||'0');
+    var tipo   = mapTipo(getCol(r,h,['TIPO SILO','TIPO'],4)||'SILO');
+    if(!cod||!nom||nom==='-'||cap<=0)return;
+    est.push({cod:cod,u:ubi,n:nom,c:cap,t:tipo});
+  });
+  /* ordenar por ubicación y luego por capacidad descendente */
+  est.sort(function(a,b){
+    return a.u!==b.u?a.u.localeCompare(b.u):b.c-a.c;
+  });
+  console.log('[EST] Silos cargados:',est.length,
+    '| Ejemplo:',est.length?est[0].n+'(cod='+est[0].cod+')':'ninguno');
+  return est;
+}
+
+/* ══════════════════════════════════════════════════════
+   PARSEAR INVENTARIO desde CSV
+   Almacén = mandante (código numérico sin ceros: 12, 13...)
+   Col G (idx 6) = Libre utilización (KG)
+══════════════════════════════════════════════════════ */
+function buildINV(parsed){
+  var inv={};
+  var h=parsed.hdr;
+  parsed.rows.forEach(function(r){
+    /* Código almacén — busca por nombre, fallback col A (0) y col E (4) */
+    var codRaw = getCol(r,h,['Almacén','Almacen','ALMACEN'],0) ||
+                 getCol(r,h,['ALMACEN','ALM'],4);
+    var cod = normCode(codRaw);   /* "0012" → 12 para TODOS los almacenes */
+    if(!cod)return;
+
+    var mat = String(getCol(r,h,['Texto breve de material','Texto breve','Material'],2)||'').trim();
+    var kg  = pn(getCol(r,h,['Libre utilización','Libre utilizacion','Libre Util'],6)||'0');
+
+    if(!inv[cod])inv[cod]={kg:0,m:'',_mx:0};
+    inv[cod].kg+=kg;   /* sumar TODAS las filas del mismo almacén */
+    if(mat&&Math.abs(kg)>inv[cod]._mx){inv[cod].m=mat;inv[cod]._mx=Math.abs(kg);}
+  });
+
+  console.log('[INV] Almacenes con stock:',Object.keys(inv).filter(function(k){return inv[k].kg>0;}).length,
+    '/ Total:',Object.keys(inv).length);
+  console.log('[INV] Todos los códigos cargados:',
+    Object.keys(inv).sort(function(a,b){return a-b;}).join(', '));
+  return inv;
+}
+
+/* ══════════════════════════════════════════════════════
+   SINCRONIZACIÓN
+══════════════════════════════════════════════════════ */
+function setSync(ok,txt){
+  var dot=document.getElementById('sdot');
+  dot.style.cssText='background:'+(ok?'#2ecc71':'#e74c3c')+';box-shadow:0 0 6px '+(ok?'#2ecc71':'#e74c3c');
+  document.getElementById('stxt').textContent=txt;
+}
+
+function load(){
+  var ts='&_t='+Date.now();
+  Promise.all([
+    fetch(URL_INV+ts).then(function(r){return r.text();}),
+    fetch(URL_EST+ts).then(function(r){return r.text();})
+  ]).then(function(results){
+    var invParsed=parseCSV(results[0]);
+    var estParsed=parseCSV(results[1]);
+
+    /* Si la hoja de estructura no tiene datos usamos el inventario
+       como fallback (por si ambos están en la misma hoja) */
+    var estOk = estParsed.rows.length > 0 &&
+                estParsed.hdr.some(function(h){return h.toUpperCase().indexOf('CAP')>-1;});
+
+    EST = buildEST(estOk ? estParsed : invParsed);
+    INV = buildINV(invParsed);
+
+    setSync(true,'En vivo · '+new Date().toLocaleTimeString('es-EC'));
+    document.getElementById('loading').style.display='none';
+    render();
+  }).catch(function(err){
+    console.error('[LOAD ERROR]',err);
+    setSync(false,'Error de conexión');
+    /* intentar solo inventario si estructura falla */
+    fetch(URL_INV+'&_t='+Date.now()).then(function(r){return r.text();})
+    .then(function(txt){
+      var p=parseCSV(txt);
+      INV=buildINV(p);
+      if(!EST.length) EST=buildEST(p); /* misma hoja si tiene estructura */
+      document.getElementById('loading').style.display='none';
+      render();
+    }).catch(function(){
+      document.getElementById('loading').style.display='none';
+      document.getElementById('main').innerHTML='<div style="text-align:center;padding:60px;color:#982828;font-family:Barlow Condensed,sans-serif;font-size:16px;">⚠️ No se pudo cargar el CSV.<br><small>Verifica que las hojas estén publicadas en Google Sheets.</small></div>';
+    });
+  });
+}
 
 /* ═══════════════════════════════════════
    SVG BUILDERS — REALISTIC WIDE SILOS
@@ -578,6 +692,18 @@ function sz(cap,maxCap,tipo){
   return{w:Math.round(72+(160-72)*r), h:Math.round(130+(250-130)*r)};
 }
 
+function sz(cap,maxCap,tipo){
+  var r=Math.pow(Math.max(0.08,cap/maxCap),0.43);
+  if(tipo==='BODEGA'){
+    return{w:Math.round(90+(180-90)*r), h:Math.round(100+(180-100)*r)};
+  }
+  if(tipo==='TOLVA'){
+    return{w:Math.round(45+(80-45)*r), h:Math.round(100+(160-100)*r)};
+  }
+  /* SILO & PULMON: wide cards */
+  return{w:Math.round(72+(160-72)*r), h:Math.round(130+(250-130)*r)};
+}
+
 /* ── RENDER ── */
 function render(){
   var grupos={};
@@ -679,118 +805,6 @@ function mkK(cl,lbl,val,sub,p,pcol){
     +'</div>';
 }
 
-/* ── CSV ── */
-function parseCSV(txt){
-  var rows=[],cur=[],cell='',inQ=false;
-  for(var i=0;i<txt.length;i++){
-    var c=txt[i];
-    if(c==='"'){inQ=!inQ;}
-    else if(c===','&&!inQ){cur.push(cell.trim());cell='';}
-    else if((c==='\n'||c==='\r')&&!inQ){
-      if(cell||cur.length){cur.push(cell.trim());rows.push(cur);}
-      cell='';cur=[];if(c==='\r'&&txt[i+1]==='\n')i++;
-    }else cell+=c;
-  }
-  if(cell||cur.length){cur.push(cell.trim());rows.push(cur);}
-  if(!rows.length)return[];
-  var hdr=rows[0].map(function(h){return h.replace(/"/g,'').trim();});
-  return rows.slice(1).filter(function(r){return r.some(function(c){return c;});}).map(function(r){
-    var o={};hdr.forEach(function(h,j){o[h]=(r[j]||'').replace(/"/g,'').trim();});o._r=r;return o;
-  });
-}
-function buildINV(rows){
-  var inv={};
-  if(!rows.length) return inv;
-
-  /* ── Detectar columnas dinámicamente por nombre de encabezado ──
-     Columna A (idx 0) = código Almacén (mandante principal)
-     Columna C (idx 2) = Texto breve de material
-     Columna G (idx 6) = Libre utilización (KG)
-     Si el nombre de encabezado coincide, tiene prioridad sobre índice fijo */
-  var hdr = rows[0]._r ? null : Object.keys(rows[0]).filter(function(k){return k!=='_r';});
-
-  function getVal(r, names, fallbackIdxs) {
-    /* buscar por nombre de columna (case-insensitive, sin tildes) */
-    var norm = function(s){ return String(s||'').toUpperCase().replace(/[ÁÀÂÄ]/g,'A').replace(/[ÉÈÊË]/g,'E').replace(/[ÍÌÎÏ]/g,'I').replace(/[ÓÒÔÖ]/g,'O').replace(/[ÚÙÛÜ]/g,'U').replace(/[^A-Z0-9]/g,''); };
-    for(var ni=0; ni<names.length; ni++){
-      var target = norm(names[ni]);
-      var keys = Object.keys(r).filter(function(k){return k!=='_r';});
-      for(var ki=0; ki<keys.length; ki++){
-        if(norm(keys[ki]).indexOf(target)>-1 || target.indexOf(norm(keys[ki]))>-1){
-          var v = r[keys[ki]];
-          if(v!==undefined && String(v).trim()!=='') return v;
-        }
-      }
-    }
-    /* fallback por índice de columna (Col A=0, Col C=2, Col G=6) */
-    if(r._r){
-      for(var fi=0; fi<fallbackIdxs.length; fi++){
-        var fv = r._r[fallbackIdxs[fi]];
-        if(fv!==undefined && String(fv).trim()!=='') return fv;
-      }
-    }
-    return '';
-  }
-
-  rows.forEach(function(r){
-    /* Código Almacén: busca por nombre, fallback Col A (0) luego Col E (4) */
-    var codRaw = getVal(r, ['Almacén','Almacen','ALM','CODIGO','COD'], [0, 4]);
-    var cod = parseInt(String(codRaw).trim()) || 0;
-    if(!cod) return;
-
-    /* Material: Col C (2) */
-    var mat = String(getVal(r, ['Texto breve de material','Texto breve','Material','DESCRIPCION'], [2]) || '').trim();
-
-    /* KG: Libre utilización Col G (6) — sumar TODO (no filtrar por kg<=0) */
-    var kgRaw = getVal(r, ['Libre utilización','Libre utilizacion','Libre Util','LIBRE UTIL'], [6]);
-    var kg = pn(kgRaw);
-
-    if(!inv[cod]) inv[cod]={kg:0, m:'', _mx:0};
-    inv[cod].kg += kg;
-    /* guardar material con mayor cantidad absoluta */
-    if(mat && Math.abs(kg) > inv[cod]._mx){
-      inv[cod].m = mat;
-      inv[cod]._mx = Math.abs(kg);
-    }
-  });
-
-  /* Log de diagnóstico en consola */
-  var loaded = Object.keys(inv).length;
-  console.log('[INV] Almacenes cargados:', loaded,
-    '| Ejemplo cod 12:', inv[12] ? (inv[12].kg/1000).toFixed(2)+'k KG' : 'NO ENCONTRADO',
-    '| Ejemplo cod 13:', inv[13] ? (inv[13].kg/1000).toFixed(2)+'k KG' : 'NO ENCONTRADO');
-
-  return inv;
-}
-function setSync(ok,txt){
-  document.getElementById('sdot').style.cssText='background:'+(ok?'#2ecc71':'#e74c3c')+';box-shadow:0 0 6px '+(ok?'#2ecc71':'#e74c3c');
-  document.getElementById('stxt').textContent=txt;
-}
-function load(){
-  fetch(CSV+'&t='+Date.now())
-    .then(function(r){return r.text();})
-    .then(function(txt){
-      INV=buildINV(parseCSV(txt));
-      setSync(true,'En vivo · '+new Date().toLocaleTimeString('es-EC'));
-      document.getElementById('loading').style.display='none';
-      render();
-    })
-    .catch(function(){
-      INV=FB;setSync(false,'Datos locales 25/05/2026');
-      document.getElementById('loading').style.display='none';
-      render();
-    });
-}
-function pn(s){
-  if(typeof s==='number')return s;
-  s=String(s||'').trim().replace(/\s/g,'');if(!s||s==='-')return 0;
-  if(s.indexOf(',')>-1&&s.indexOf('.')>-1)
-    s=s.lastIndexOf(',')>s.lastIndexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');
-  else if(s.indexOf(',')>-1)s=s.replace(',','.');
-  return parseFloat(s)||0;
-}
-function ft(kg){var t=kg/1000;if(t>=1000)return(t/1000).toFixed(1)+'k TON';if(t>=100)return Math.round(t)+' TON';return t.toFixed(2)+' TON';}
-function fn(n){return n.toLocaleString('es-EC',{maximumFractionDigits:0});}
 
 setInterval(function(){
   var n=new Date();
