@@ -700,15 +700,66 @@ function parseCSV(txt){
 }
 function buildINV(rows){
   var inv={};
+  if(!rows.length) return inv;
+
+  /* ── Detectar columnas dinámicamente por nombre de encabezado ──
+     Columna A (idx 0) = código Almacén (mandante principal)
+     Columna C (idx 2) = Texto breve de material
+     Columna G (idx 6) = Libre utilización (KG)
+     Si el nombre de encabezado coincide, tiene prioridad sobre índice fijo */
+  var hdr = rows[0]._r ? null : Object.keys(rows[0]).filter(function(k){return k!=='_r';});
+
+  function getVal(r, names, fallbackIdxs) {
+    /* buscar por nombre de columna (case-insensitive, sin tildes) */
+    var norm = function(s){ return String(s||'').toUpperCase().replace(/[ÁÀÂÄ]/g,'A').replace(/[ÉÈÊË]/g,'E').replace(/[ÍÌÎÏ]/g,'I').replace(/[ÓÒÔÖ]/g,'O').replace(/[ÚÙÛÜ]/g,'U').replace(/[^A-Z0-9]/g,''); };
+    for(var ni=0; ni<names.length; ni++){
+      var target = norm(names[ni]);
+      var keys = Object.keys(r).filter(function(k){return k!=='_r';});
+      for(var ki=0; ki<keys.length; ki++){
+        if(norm(keys[ki]).indexOf(target)>-1 || target.indexOf(norm(keys[ki]))>-1){
+          var v = r[keys[ki]];
+          if(v!==undefined && String(v).trim()!=='') return v;
+        }
+      }
+    }
+    /* fallback por índice de columna (Col A=0, Col C=2, Col G=6) */
+    if(r._r){
+      for(var fi=0; fi<fallbackIdxs.length; fi++){
+        var fv = r._r[fallbackIdxs[fi]];
+        if(fv!==undefined && String(fv).trim()!=='') return fv;
+      }
+    }
+    return '';
+  }
+
   rows.forEach(function(r){
-    var cod=parseInt(r['Almacén']||(r._r&&r._r[4])||'0');
-    var mat=(r['Texto breve de material']||(r._r&&r._r[2])||'').trim();
-    var kg=pn(r['Libre utilización']||(r._r&&r._r[6])||'0');
-    if(!cod)return;
-    if(!inv[cod])inv[cod]={kg:0,m:'',_mx:0};
-    inv[cod].kg+=kg;
-    if(mat&&kg>inv[cod]._mx){inv[cod].m=mat;inv[cod]._mx=kg;}
+    /* Código Almacén: busca por nombre, fallback Col A (0) luego Col E (4) */
+    var codRaw = getVal(r, ['Almacén','Almacen','ALM','CODIGO','COD'], [0, 4]);
+    var cod = parseInt(String(codRaw).trim()) || 0;
+    if(!cod) return;
+
+    /* Material: Col C (2) */
+    var mat = String(getVal(r, ['Texto breve de material','Texto breve','Material','DESCRIPCION'], [2]) || '').trim();
+
+    /* KG: Libre utilización Col G (6) — sumar TODO (no filtrar por kg<=0) */
+    var kgRaw = getVal(r, ['Libre utilización','Libre utilizacion','Libre Util','LIBRE UTIL'], [6]);
+    var kg = pn(kgRaw);
+
+    if(!inv[cod]) inv[cod]={kg:0, m:'', _mx:0};
+    inv[cod].kg += kg;
+    /* guardar material con mayor cantidad absoluta */
+    if(mat && Math.abs(kg) > inv[cod]._mx){
+      inv[cod].m = mat;
+      inv[cod]._mx = Math.abs(kg);
+    }
   });
+
+  /* Log de diagnóstico en consola */
+  var loaded = Object.keys(inv).length;
+  console.log('[INV] Almacenes cargados:', loaded,
+    '| Ejemplo cod 12:', inv[12] ? (inv[12].kg/1000).toFixed(2)+'k KG' : 'NO ENCONTRADO',
+    '| Ejemplo cod 13:', inv[13] ? (inv[13].kg/1000).toFixed(2)+'k KG' : 'NO ENCONTRADO');
+
   return inv;
 }
 function setSync(ok,txt){
