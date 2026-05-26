@@ -226,13 +226,13 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
 
     <div class="cfg-section">
       <label class="cfg-label">📦 URL CSV — Hoja de Inventario (BD-MB52-SILOS)</label>
-      <div class="cfg-desc">Hoja con columnas: Almacén, Texto breve de material, Libre utilización, Denominación-almacén</div>
+      <div class="cfg-desc">Asegúrate de que la columna E sea "Almacén"</div>
       <input class="cfg-input" id="urlInv" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?gid=XXXXXX&single=true&output=csv">
     </div>
 
     <div class="cfg-section">
       <label class="cfg-label">🏗️ URL CSV — Hoja de Estructura (SILOS ESTRUCTURA)</label>
-      <div class="cfg-desc">Hoja con columnas: Almacén, UBICACION, NOMBRE ALMACEN, CAP ALM TON, TIPO SILO</div>
+      <div class="cfg-desc">Asegúrate de que la columna A sea "Almacén"</div>
       <input class="cfg-input" id="urlEst" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?gid=XXXXXX&single=true&output=csv">
     </div>
 
@@ -332,7 +332,8 @@ function parseCSV(text) {
   }
   if (field !== '' || row.length) { row.push(field.trim()); if (row.some(function(f){return f!=='';})) lines.push(row); }
   if (!lines.length) return [];
-  var headers = lines[0];
+  // Forzamos los encabezados a mayúsculas para evitar errores de tipeo en el excel
+  var headers = lines[0].map(function(h) { return h.trim().toUpperCase(); });
   return lines.slice(1).map(function(r) {
     var obj = {};
     headers.forEach(function(h, i) { obj[h] = r[i] !== undefined ? r[i] : ''; });
@@ -341,15 +342,14 @@ function parseCSV(text) {
 }
 
 /* ═══════════════════════════════════════════════
-   UTILS Y CORRELACIÓN DE DATOS (NUEVO)
+   UTILS Y CORRELACIÓN DE DATOS ESTRICTA
 ═══════════════════════════════════════════════ */
-// Esta función lee el "Almacén" limpiándolo y asegurando que se compare como TEXTO, 
-// así si SAP envía "0100" o "C001", no se rompe la relación.
+
+// Esta función lee el código del Almacén, le quita los espacios y le borra
+// los ceros a la izquierda. Así garantiza que "0012" sea idéntico a "12".
 function parseCod(c) {
-  if(c === undefined || c === null) return '';
-  var s = String(c).trim().toUpperCase();
-  // Si es un número puro con ceros a la izquierda, le quita los ceros para estandarizar
-  return /^\d+$/.test(s) ? parseInt(s, 10).toString() : s;
+  if (!c) return '';
+  return String(c).trim().replace(/^0+/, ''); 
 }
 
 function pn(s) {
@@ -382,7 +382,7 @@ function mapTipo(raw) {
 }
 
 /* ═══════════════════════════════════════════════
-   DATA LOADING
+   DATA LOADING (JOIN TIPO BASE DE DATOS)
 ═══════════════════════════════════════════════ */
 function loadData() {
   if (!DEFAULT_CONFIG.urlInv || !DEFAULT_CONFIG.urlEst) {
@@ -412,46 +412,60 @@ function loadData() {
     var invRows = parseCSV(results[0]);
     var estRows = parseCSV(results[1]);
 
-    // PROCESAR INVENTARIO (Correlación por Texto Estandarizado)
-    var inv = {};
+    // 1. DICCIONARIO DE INVENTARIO (La llave es el Código de Almacén)
+    var invByCod = {};
+    
     invRows.forEach(function(r) {
-      var cod = parseCod(r['Almacén'] || r['Almacen'] || r['ALMACEN']);
-      var mat = String(r['Texto breve de material'] || r['Material'] || '').trim();
-      var kg  = pn(r['Libre utilización'] || r['Libre utilizacion'] || r['LIBRE UTILIZACION'] || 0);
-      var den = String(r['Denominación-almacén'] || r['Denominacion-almacen'] || '').trim();
+      // Extrae la columna E del Inventario (Almacén)
+      var cod = parseCod(r['ALMACÉN'] || r['ALMACEN']);
+      var mat = String(r['TEXTO BREVE DE MATERIAL'] || r['MATERIAL'] || '').trim();
+      var kg  = pn(r['LIBRE UTILIZACIÓN'] || r['LIBRE UTILIZACION'] || 0);
       
-      if (!cod) return;
-      if (!inv[cod]) inv[cod] = {kg:0, m:'', _mx:0, den:''};
-      inv[cod].kg += kg;
+      if (!cod || kg <= 0) return;
+
+      if (!invByCod[cod]) invByCod[cod] = {kg: 0, m: '', _mx: 0};
       
-      // Mantener el material principal (el que tenga más kilos en ese almacén)
-      if (mat && kg > inv[cod]._mx) { inv[cod].m = mat; inv[cod].den = den; inv[cod]._mx = kg; }
+      invByCod[cod].kg += kg;
+      // Guardar el material con mayor cantidad en ese almacén
+      if (mat && kg > invByCod[cod]._mx) { 
+        invByCod[cod].m = mat; 
+        invByCod[cod]._mx = kg; 
+      }
     });
 
-    // PROCESAR ESTRUCTURA (Correlación por Texto Estandarizado)
+    // 2. CONJUNTO DE DATOS FINAL (Combinando ambas tablas vía código)
     var est = [];
+    var invMatched = {};
+
     estRows.forEach(function(r) {
-      var cod  = parseCod(r['Almacén'] || r['Almacen'] || r['ALMACEN']);
-      var ubi  = String(r['UBICACION'] || r['Ubicacion'] || '').trim().toUpperCase();
-      var nom  = String(r['NOMBRE ALMACEN'] || r['Nombre Almacen'] || '').trim().toUpperCase();
-      var cap  = pn(r['CAP ALM TON'] || r['Cap Alm Ton'] || r['CAPACIDAD'] || 0);
-      var tipo = mapTipo(String(r['TIPO SILO'] || r['Tipo Silo'] || 'SILO').trim());
+      // Extrae la columna A de la Estructura (Almacén)
+      var cod  = parseCod(r['ALMACÉN'] || r['ALMACEN']);
+      var ubi  = String(r['UBICACIÓN'] || r['UBICACION'] || '').trim().toUpperCase();
+      var nom  = String(r['NOMBRE ALMACÉN'] || r['NOMBRE ALMACEN'] || '').trim().toUpperCase();
+      var cap  = pn(r['CAP ALM TON'] || r['CAPACIDAD'] || 0);
+      var tipo = mapTipo(String(r['TIPO SILO'] || 'SILO').trim());
       
-      if (!cod || !ubi || !nom || nom === '-' || cap <= 0) return;
-      est.push({cod:cod, u:ubi, n:nom, c:cap, t:tipo});
+      if (!cod || !nom || nom === '-' || cap <= 0) return;
+
+      // Se guarda la estructura física
+      est.push({cod: cod, u: ubi, n: nom, c: cap, t: tipo});
+
+      // RELACIÓN EXACTA: Buscamos en el diccionario usando el código como llave.
+      // Si el almacén no existe en el inventario, se crea vacío (0 kg).
+      invMatched[nom] = invByCod[cod] || {kg: 0, m: ''}; 
     });
     
     // Ordenar estructuras
     est.sort(function(a,b){ return a.u !== b.u ? a.u.localeCompare(b.u) : b.c - a.c; });
 
-    INV = inv;
+    INV = invMatched;
     EST = est;
 
     // Actualizar UI
     var now = new Date();
     var timeStr = now.toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
     setSyncState('ok', 'Actualizado ' + timeStr);
-    document.getElementById('fileRows').textContent = Object.keys(inv).length;
+    document.getElementById('fileRows').textContent = Object.keys(invRows).length;
     document.getElementById('fileStructures').textContent = est.length;
     document.getElementById('fileDate').textContent = 'Última sincronización: ' + now.toLocaleString('es-EC');
     document.getElementById('fileBanner').style.display = 'flex';
@@ -489,7 +503,7 @@ function startCountdown() {
 }
 
 /* ═══════════════════════════════════════════════
-   SVG BUILDERS
+   SVG BUILDERS (Gráficos)
 ═══════════════════════════════════════════════ */
 function mkDefs(id) {
   return '<defs>'
@@ -671,7 +685,7 @@ function render() {
   Object.keys(grupos).forEach(function(u) { grupos[u].sort(function(a,b){return b.c-a.c;}); });
 
   var gC=0, gK=0;
-  EST.forEach(function(d) { gC+=d.c; gK+=(INV[d.cod]||{kg:0}).kg; });
+  EST.forEach(function(d) { gC+=d.c; gK+=(INV[d.n]||{kg:0}).kg; });
   var gP = gC>0 ? Math.round(gK/gC*100) : 0, gPc = pc(gP);
 
   document.getElementById('hkpis').innerHTML =
@@ -693,9 +707,9 @@ function render() {
   uL.forEach(function(ubi,ui) {
     var silos = grupos[ubi];
     var maxC = silos[0].c, lC=0, lK=0;
-    silos.forEach(function(d) { lC+=d.c; lK+=(INV[d.cod]||{kg:0}).kg; });
+    silos.forEach(function(d) { lC+=d.c; lK+=(INV[d.n]||{kg:0}).kg; });
     var lP = lC>0 ? Math.round(lK/lC*100) : 0, lPc = pc(lP);
-    var lAct = silos.filter(function(d){return (INV[d.cod]||{kg:0}).kg>0;}).length;
+    var lAct = silos.filter(function(d){return (INV[d.n]||{kg:0}).kg>0;}).length;
 
     var panel = document.createElement('div');
     panel.className = 'panel'+(ui===TAB?' active':'');
@@ -716,7 +730,7 @@ function render() {
 
     var grid = panel.querySelector('#sg'+ui);
     silos.forEach(function(d) {
-      var inv = INV[d.cod] || {kg:0, m:''};
+      var inv = INV[d.n] || {kg:0, m:''};
       var dim = sz(d.c, maxC, d.t);
       var pct = d.c>0 ? Math.min(100,Math.max(0,Math.round(inv.kg/d.c*100))) : 0;
       var est = GS[d.n]!==undefined ? GS[d.n] : 1, sc = SC[String(est)];
