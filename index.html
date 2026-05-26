@@ -159,6 +159,7 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
 </head>
 <body>
 
+<!-- HEADER -->
 <header>
   <div class="hbrand">
     <div class="hicon">🌾</div>
@@ -192,6 +193,7 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
   </div>
 </header>
 
+<!-- BANNER INFO -->
 <div class="file-banner" id="fileBanner" style="display:none">
   <span class="file-banner-icon">📡</span>
   <span>Fuente: <strong>Google Sheets · en vivo</strong></span>
@@ -202,15 +204,19 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
   <span class="file-date" id="fileDate"></span>
 </div>
 
+<!-- REFRESH COUNTDOWN BAR -->
 <div class="refresh-bar" id="refreshBar" style="display:none">
   <span>⟳ Próxima actualización en</span><span class="rc" id="cntDown">5:00</span>
   <span style="margin-left:auto;font-size:10px;opacity:.7">Auto-refresh cada 5 minutos · Haz clic en "Actualizar" para forzar</span>
 </div>
 
+<!-- KPI BAR -->
 <div class="kpi-bar" id="kbar" style="display:none"></div>
 
+<!-- TABS -->
 <nav class="tabs-nav" id="tnav" style="display:none"></nav>
 
+<!-- CONTENT -->
 <main id="main">
   <div class="empty-state" id="loadingState">
     <div class="empty-spinner"></div>
@@ -219,11 +225,13 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
   </div>
 </main>
 
+<!-- CONFIG MODAL -->
 <div class="modal-overlay" id="cfgOverlay">
   <div class="modal">
     <div class="modal-title">⚙️ Configurar Google Sheets</div>
     <div class="modal-sub">Ingresa las URLs CSV de tus hojas publicadas. Los datos se cargarán directamente desde Google Sheets cada 5 minutos.</div>
 
+    <!-- How to get URLs -->
     <div class="cfg-hint" style="margin-bottom:18px;">
       <strong style="color:var(--navy);">¿Cómo obtener las URLs?</strong>
       <ol class="step-list">
@@ -270,8 +278,8 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
    no usar el panel de configuración visual
 ═══════════════════════════════════════════════ */
 var DEFAULT_CONFIG = {
-  urlInv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQsHD68GsN5kH9NtuQF5g_Q_lTQmJEv6YDnLfnd6zurixDZrkw-7loPPxlBEC3khaX3vnlM4eFNuXBy/pub?gid=0&single=true&output=csv',
-  urlEst: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQsHD68GsN5kH9NtuQF5g_Q_lTQmJEv6YDnLfnd6zurixDZrkw-7loPPxlBEC3khaX3vnlM4eFNuXBy/pub?gid=349286573&single=true&output=csv'
+  urlInv: '',   // URL CSV de BD-MB52-SILOS
+  urlEst: ''    // URL CSV de SILOS ESTRUCTURA
 };
 
 var REFRESH_MS = 5 * 60 * 1000; // 5 minutos
