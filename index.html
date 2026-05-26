@@ -139,6 +139,12 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
   </div>
 </header>
 
+
+<!-- DEBUG PANEL - se oculta automáticamente cuando los datos cargan -->
+<div id="debugPanel" style="background:#1a2e3e;border-bottom:2px solid #2a4a60;padding:10px 24px;font-family:monospace;font-size:10px;color:#7af0a0;display:none;">
+  <div style="font-weight:700;color:#4af0c0;margin-bottom:4px;">🔍 DIAGNÓSTICO CSV (F12 para más detalle)</div>
+  <div id="debugContent" style="line-height:1.7;white-space:pre-wrap;"></div>
+</div>
 <div class="date-bar" id="dateBar" style="display:none">
   <span class="date-label">📅 Inventario:</span>
   <div class="date-pills" id="datePills"></div>
@@ -262,11 +268,24 @@ function pb(p){return p>=85?'rgba(152,40,40,.1)':p>=50?'rgba(176,96,16,.1)':'rgb
 function pt(p){return p>=85?'#c03030':p>=50?'#c87018':'#189858';}
 function mapTipo(r){r=String(r||'').toUpperCase();if(r.indexOf('CONICO')>-1||r.indexOf('PULMON')>-1||r.indexOf('PULMÓN')>-1)return 'PULMON';if(r.indexOf('BODEGA')>-1)return 'BODEGA';if(r.indexOf('TOLVA')>-1)return 'TOLVA';return 'SILO';}
 function normDate(s){
-  s=String(s||'').trim();if(!s)return null;
+  s=String(s||'').trim().replace(/"/g,'');
+  if(!s||s.toUpperCase()==='FECHA'||s.toUpperCase()==='DATE')return null;
   var m;
-  if((m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/)))return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
-  if((m=s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/)))return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
-  var d=new Date(s);return isNaN(d)?null:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  /* YYYY-MM-DD o YYYY/MM/DD */
+  if((m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/)))
+    return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+  /* DD/MM/YYYY o DD-MM-YYYY */
+  if((m=s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/)))
+    return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+  /* Número serial de Excel/Sheets (ej: 46197) */
+  if(/^\d{5}$/.test(s)){
+    var d=new Date(Date.UTC(1899,11,30)+(parseInt(s)*86400000));
+    if(!isNaN(d))return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');
+  }
+  /* parseo nativo como último recurso */
+  var d2=new Date(s);
+  if(!isNaN(d2.getTime()))return d2.getFullYear()+'-'+String(d2.getMonth()+1).padStart(2,'0')+'-'+String(d2.getDate()).padStart(2,'0');
+  return null;
 }
 function fmtDate(iso){if(!iso)return'—';var p=iso.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
 function setSyncCsv(ok,txt){
@@ -316,8 +335,36 @@ function buildEST(p){
    Col E (idx 4) = Código Almacén ("0012" → 12)
    Col G (idx 6) = Libre utilización (KG)
 ══════════════════════════════════════════════════════ */
+function showDebug(html){
+  var p=document.getElementById('debugPanel');
+  var c=document.getElementById('debugContent');
+  if(p&&c){p.style.display='block';c.innerHTML=html;}
+}
+
 function buildALL(p){
   var allInv={}, dateSet={};
+  /* ── Debug visible ── */
+  var dbg='';
+  dbg+='Total filas CSV: <b>'+p.rows.length+'</b>\n';
+  if(p.rows.length>0){
+    var r0=p.rows[0]._r||[];
+    dbg+='Col A (Fecha):   <b style=\'color:#ffdd88\'>'+(r0[0]||'VACÍO')+'</b>  → normDate: <b>'+(normDate(r0[0]||'')||'NULL ⚠️')+'</b>\n';
+    dbg+='Col C (Nombre):  <b style=\'color:#88ffdd\'>'+(r0[2]||'VACÍO')+'</b>\n';
+    dbg+='Col E (Almacén): <b style=\'color:#88ddff\'>'+(r0[4]||'VACÍO')+'</b>  → normCode: <b>'+(normCode(r0[4]||'')||'NULL ⚠️')+'</b>\n';
+    dbg+='Col G (KG):      <b style=\'color:#ffaa88\'>'+(r0[6]||'VACÍO')+'</b>  → pn(): <b>'+pn(r0[6]||'')+'</b>\n';
+    if(p.rows.length>1){var r1=p.rows[1]._r||[];dbg+='Fila 2 completa: '+r1.slice(0,8).join(' | ')+'\n';}
+  }else{dbg+='<span style=\'color:#ff6666\'>⚠️ CSV vacío — verifica que la hoja esté publicada correctamente</span>\n';}
+  showDebug(dbg);
+  console.log('[CSV INV] Total filas:', p.rows.length);
+  if(p.rows.length>0){
+    console.log('[CSV INV] Encabezados:', p.hdr ? p.hdr.join(' | ') : 'sin hdr');
+    console.log('[CSV INV] Fila 1 raw:', (p.rows[0]._r||[]).slice(0,8).join(' | '));
+    console.log('[CSV INV] Fila 1 Col A(fecha):', (p.rows[0]._r||[])[0]);
+    console.log('[CSV INV] Fila 1 Col E(alm):',   (p.rows[0]._r||[])[4]);
+    console.log('[CSV INV] Fila 1 Col G(kg):',    (p.rows[0]._r||[])[6]);
+    console.log('[CSV INV] normDate fila1:', normDate((p.rows[0]._r||[])[0]||''));
+    console.log('[CSV INV] normCode fila1:', normCode((p.rows[0]._r||[])[4]||''));
+  }
   p.rows.forEach(function(r){
     var row=r._r||[];
     var fechaISO = normDate(row[0]||'');
@@ -334,7 +381,25 @@ function buildALL(p){
     }
     dateSet[fechaISO]=true;
   });
-  return{allInv:allInv, dates:Object.keys(dateSet).sort().reverse()};
+  var dates2=Object.keys(dateSet).sort().reverse();
+  console.log('[CSV INV] Fechas encontradas:', dates2.length, dates2.join(', '));
+  /* Actualizar debug panel con resultado */
+  var panel=document.getElementById('debugContent');
+  if(panel){
+    if(dates2.length>0){
+      panel.innerHTML+=('\n✅ Fechas encontradas: <b>'+dates2.join(', ')+'</b>\n');
+      panel.innerHTML+=('✅ Almacenes con datos: <b>'+Object.keys(allInv[dates2[0]]||{}).join(', ')+'</b>');
+      /* Ocultar debug panel después de 8 segundos si todo OK */
+      setTimeout(function(){
+        var dp=document.getElementById('debugPanel');
+        if(dp)dp.style.display='none';
+      },8000);
+    }else{
+      panel.innerHTML+=('\n<span style=\'color:#ff6666\'>⚠️ CERO fechas detectadas — el normDate no pudo parsear la columna A</span>\n');
+      panel.innerHTML+=('Revisa el formato de fecha en tu Google Sheet y comparte una captura.');
+    }
+  }
+  return{allInv:allInv, dates:dates2};
 }
 
 function applyDate(iso){
@@ -373,6 +438,10 @@ function buildDatePills(){
 function load(){
   document.getElementById('sdot').className='sdot loading';
   document.getElementById('stxt').textContent='Actualizando…';
+  /* Mostrar date bar con estado de carga */
+  document.getElementById('dateBar').style.display='flex';
+  document.getElementById('datePills').innerHTML='<span style="font-size:10px;color:#7a98b0;font-style:italic;">Cargando fechas…</span>';
+  document.getElementById('dateInfo').textContent='';
   Promise.all([
     fetch(URL_INV+'&_t='+Date.now()).then(function(r){return r.text();}),
     fetch(URL_EST+'&_t='+Date.now()).then(function(r){return r.text();})
@@ -391,8 +460,17 @@ function load(){
     buildDatePills();
     render();
   }).catch(function(err){
-    console.error(err);
-    setSyncCsv(false,'Error CSV');
+    console.error('[LOAD ERROR]',err);
+    setSyncCsv(false,'Error: '+err.message);
+    document.getElementById('loading').style.display='none';
+    document.getElementById('main').innerHTML=
+      '<div style="margin:40px auto;max-width:500px;background:#fff;border:1px solid #d8e2ec;border-left:4px solid #982828;border-radius:10px;padding:20px 24px;">'
+      +'<div style="font-family:Barlow Condensed,sans-serif;font-size:16px;font-weight:700;color:#982828;margin-bottom:8px;">⚠️ Error al cargar el CSV</div>'
+      +'<div style="font-size:11px;color:#3a5870;line-height:1.6;margin-bottom:12px;">'+err.message+'<br><br>'
+      +'Verifica en la <strong>consola (F12)</strong> los detalles del error.<br>'
+      +'Asegúrate que las hojas estén publicadas en Google Sheets: <em>Archivo → Compartir → Publicar en la web → CSV</em></div>'
+      +'<button onclick="load()" style="background:#0c2840;border:none;border-radius:8px;padding:9px 18px;font-family:Barlow Condensed,sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;color:#fff;cursor:pointer;">🔄 Reintentar</button>'
+      +'</div>';
   });
 }
 
