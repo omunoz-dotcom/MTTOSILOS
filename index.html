@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>ALMACENERA — Control de Silos</title>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -104,6 +107,14 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
 @keyframes spin{to{transform:rotate(360deg);}}
 .ltxt{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;}
 ::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* FIREBASE BADGE */
+.fb-badge{display:flex;align-items:center;gap:5px;background:rgba(66,133,244,.15);border:1px solid rgba(66,133,244,.3);border-radius:20px;padding:3px 11px;}
+.fb-dot{width:6px;height:6px;border-radius:50%;background:#4a90e2;}
+.fb-dot.ok{background:#4a90e2;box-shadow:0 0 6px #4a90e2;animation:blink 2s ease-in-out infinite;}
+.fb-dot.err{background:#e74c3c;box-shadow:0 0 5px #e74c3c;}
+.fb-dot.loading{background:#e09820;animation:blink .5s ease-in-out infinite;}
+.fb-txt{font-size:9px;color:rgba(255,255,255,.55);letter-spacing:.5px;}
 </style>
 </head>
 <body>
@@ -113,6 +124,7 @@ header{background:var(--navy);height:58px;padding:0 24px;display:flex;align-item
   <div class="hkpis" id="hkpis"></div>
   <div class="hright">
     <div class="spill"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Cargando…</span></div>
+    <div class="fb-badge"><div class="fb-dot loading" id="fbDot"></div><span class="fb-txt" id="fbTxt">Firebase…</span></div>
     <div id="clk"></div>
   </div>
 </header>
@@ -152,6 +164,57 @@ var STATE_ORDER=[1,0,-1,2,-2];  /* ciclo al hacer clic */
 var GS={}, INV={}, EST=[], TAB=0;
 /* ALL_INV[fechaISO][cod] = {kg,m} — para filtro de fecha */
 var ALL_INV={}, ALL_DATES=[], SEL_DATE=null;
+
+
+/* ══ FIREBASE — agripac-control ══════════════════════════════════════════
+   Colección: silos_estados  |  Documento: almacenera
+   Guarda/escucha el estado del grano de cada silo en tiempo real
+══════════════════════════════════════════════════════════════════════════ */
+firebase.initializeApp({
+  apiKey:            'AIzaSyANUkQlUGrMh4ET1LdyYCucuZqqVKR39u4',
+  authDomain:        'agripac-control.firebaseapp.com',
+  databaseURL:       'https://agripac-control-default-rtdb.firebaseio.com',
+  projectId:         'agripac-control',
+  storageBucket:     'agripac-control.firebasestorage.app',
+  messagingSenderId: '1033116506620',
+  appId:             '1:1033116506620:web:d4472bec9f6178b48bba79',
+  measurementId:     'G-J4MGT2J80C'
+});
+var fbDB = firebase.firestore();
+var FB_COL = 'silos_estados';
+var FB_DOC = 'almacenera';
+
+function setFbUI(state){
+  var dot=document.getElementById('fbDot');
+  var txt=document.getElementById('fbTxt');
+  if(state==='ok')  { dot.className='fb-dot ok';  txt.textContent='🔥 Sincronizado'; }
+  else if(state==='err'){ dot.className='fb-dot err'; txt.textContent='Firebase error'; }
+  else              { dot.className='fb-dot loading'; txt.textContent='Firebase…'; }
+}
+
+/* Guarda el estado de UN silo en Firestore */
+function saveEstado(nom, estado){
+  var upd={};  upd[nom]=estado;
+  fbDB.collection(FB_COL).doc(FB_DOC)
+    .set(upd,{merge:true})
+    .catch(function(e){console.error('[FB save]',e);});
+}
+
+/* Escucha cambios en tiempo real — actualiza GS y re-renderiza */
+function initFirebase(){
+  fbDB.collection(FB_COL).doc(FB_DOC)
+    .onSnapshot(function(snap){
+      if(snap.exists){
+        var data=snap.data();
+        Object.keys(data).forEach(function(k){ GS[k]=data[k]; });
+      }
+      setFbUI('ok');
+      if(EST.length) render();   /* re-render cuando llegan cambios */
+    }, function(err){
+      console.error('[FB listen]',err);
+      setFbUI('err');
+    });
+}
 
 /* ══ UTILS ═══════════════════════════════════════════ */
 function normCode(r){return parseInt(String(r||'').trim().replace(/^0+/,''))||0;}
@@ -560,7 +623,9 @@ function render(){
         var cur=GS[nom]!==undefined?GS[nom]:1;
         /* ciclo: 1 → 0 → -1 → 2 → -2 → 1 */
         var idx=STATE_ORDER.indexOf(cur);
-        GS[nom]=STATE_ORDER[(idx+1)%STATE_ORDER.length];
+        var next=STATE_ORDER[(idx+1)%STATE_ORDER.length];
+        GS[nom]=next;
+        saveEstado(nom, next);   /* ← guarda en Firebase */
         render();
       });
       grid.appendChild(card);
@@ -584,6 +649,7 @@ setInterval(function(){
     n.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 },1000);
 
+initFirebase();      /* conectar Firebase y escuchar estados */
 setInterval(load,300000);
 load();
 </script>
